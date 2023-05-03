@@ -1,140 +1,184 @@
 package com.jim.mytranslate4j;
 
-import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class ScreenCapture extends Application {
+/**
+ * @author A
+ */
+public class ScreenCapture {
 
     private double startX;
     private double startY;
     private Rectangle selectionRectangle;
     private Pane pane;
-    private Stage primaryStage;
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public void showOverlay() {
+        Stage primaryStage = new Stage();
         pane = new Pane();
-        Scene scene = new Scene(pane, Color.TRANSPARENT);
-        primaryStage.setScene(scene);
+        Scene scene = new Scene(pane);
+
+        pane.setBackground(new Background(new BackgroundFill(Color.rgb(0, 0, 0, 0.5), CornerRadii.EMPTY, Insets.EMPTY)));
         primaryStage.initStyle(StageStyle.TRANSPARENT);
-        primaryStage.setFullScreen(true);
+        primaryStage.setTitle("Custom Screenshot Tool");
+        primaryStage.setScene(scene);
+        scene.setFill(Color.TRANSPARENT);
 
-        scene.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            if (event.isControlDown() && event.getCode() == KeyCode.S) {
-                try {
-                    startScreenCapture();
-                } catch (AWTException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+        primaryStage.setX(screenBounds.getMinX());
+        primaryStage.setY(screenBounds.getMinY());
+        primaryStage.setWidth(screenBounds.getWidth());
+        primaryStage.setHeight(screenBounds.getHeight());
 
-        selectionRectangle = createSelectionRectangle();
-        pane.getChildren().add(selectionRectangle);
-
-        scene.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            startX = event.getScreenX();
-            startY = event.getScreenY();
-            selectionRectangle.setX(event.getX());
-            selectionRectangle.setY(event.getY());
-            selectionRectangle.setWidth(0);
-            selectionRectangle.setHeight(0);
-        });
-
-        scene.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-            double offsetX = event.getScreenX() - startX;
-            double offsetY = event.getScreenY() - startY;
-            selectionRectangle.setWidth(Math.abs(offsetX));
-            selectionRectangle.setHeight(Math.abs(offsetY));
-            if (offsetX < 0) {
-                selectionRectangle.setX(event.getX());
-            }
-            if (offsetY < 0) {
-                selectionRectangle.setY(event.getY());
-            }
-        });
-
-        scene.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
-            try {
-                captureAndSaveScreenshot(selectionRectangle);
-            } catch (AWTException | IOException e) {
-                e.printStackTrace();
-            }
-        });
+        // Keep the primaryStage on top of all other windows
+        primaryStage.setAlwaysOnTop(true);
 
         primaryStage.show();
+
+        scene.setOnMousePressed(this::onMousePressed);
+        scene.setOnMouseDragged(this::onMouseDragged);
+        scene.setOnMouseReleased(event -> onMouseReleased(event, primaryStage));
+
+        // ESC取消截屏
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                primaryStage.close();
+            }
+        });
+
     }
 
-    private void startScreenCapture() throws AWTException {
+
+    private void onMousePressed(MouseEvent event) {
+        if (event.getButton() == MouseButton.PRIMARY) {
+            pane.getChildren().remove(selectionRectangle);
+
+            startX = event.getX();
+            startY = event.getY();
+
+            selectionRectangle = new Rectangle(startX, startY, 0, 0);
+            selectionRectangle.setStroke(Color.BLUE);
+            selectionRectangle.setFill(Color.TRANSPARENT);
+            selectionRectangle.setStrokeWidth(1);
+
+            pane.getChildren().add(selectionRectangle);
+        }
+    }
+
+    private void onMouseDragged(MouseEvent event) {
+        if (event.getButton() == MouseButton.PRIMARY) {
+            double currentX = event.getX();
+            double currentY = event.getY();
+
+            selectionRectangle.setWidth(Math.abs(currentX - startX));
+            selectionRectangle.setHeight(Math.abs(currentY - startY));
+            selectionRectangle.setX(Math.min(currentX, startX));
+            selectionRectangle.setY(Math.min(currentY, startY));
+        }
+    }
+
+    private void onMouseReleased(MouseEvent event, Stage primaryStage) {
+        if (event.getButton() == MouseButton.PRIMARY) {
+            double width = selectionRectangle.getWidth();
+            double height = selectionRectangle.getHeight();
+
+            if (width > 0 && height > 0) {
+                primaryStage.hide();
+                captureAndSaveScreenshot(primaryStage);
+            }
+        }
+    }
+
+
+    private void captureAndSaveScreenshot(Stage primaryStage) {
+        // Hide the primaryStage before capturing
+        primaryStage.hide();
+
+        // Capture the screen using Robot
+        Rectangle2D selectionBounds = new Rectangle2D(selectionRectangle.getX(), selectionRectangle.getY(), selectionRectangle.getWidth(), selectionRectangle.getHeight());
         Robot robot = new Robot();
-        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
-        BufferedImage screenCapture = robot.createScreenCapture(new java.awt.Rectangle((int) screenBounds.getWidth(), (int) screenBounds.getHeight()));
-        WritableImage screenImage = SwingFXUtils.toFXImage(screenCapture, null);
+        javafx.scene.image.Image capturedImage = robot.getScreenCapture(null, selectionBounds);
 
-        pane.getChildren().clear();
-        pane.getChildren().add(new ImageView(screenImage));
-    }
+        // Convert the Image to a WritableImage
+        javafx.scene.image.WritableImage snapshot = new javafx.scene.image.WritableImage((int) selectionRectangle.getWidth(), (int) selectionRectangle.getHeight());
+        PixelReader reader = capturedImage.getPixelReader();
+        PixelWriter writer = snapshot.getPixelWriter();
 
-    private Rectangle createSelectionRectangle() {
-        Rectangle rect = new Rectangle();
-        rect.setFill(Color.TRANSPARENT);
-        rect.setStroke(Color.BLACK);
-        rect.getStrokeDashArray().addAll(3.0, 7.0, 3.0, 7.0);
-        return rect;
-    }
+        for (int y = 0; y < (int) selectionRectangle.getHeight(); y++) {
+            for (int x = 0; x < (int) selectionRectangle.getWidth(); x++) {
+                Color color = reader.getColor(x, y);
+                writer.setColor(x, y, color);
+            }
+        }
 
-    private void captureAndSaveScreenshot(Rectangle selectionRectangle) throws AWTException, IOException {
+        // Save the snapshot to the project root folder
+        File outputDirectory = new File("temp");
+        if (!outputDirectory.exists()) {
+            outputDirectory.mkdir();
+        }
 
-        int x = (int) selectionRectangle.getX();
-        int y = (int) selectionRectangle.getY();
-        int width = (int) selectionRectangle.getWidth();
-        int height = (int) selectionRectangle.getHeight();
-
-        Robot robot = new Robot();
-        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
-        BufferedImage screenCapture = robot.createScreenCapture(new java.awt.Rectangle(x, y, width, height));
-        WritableImage croppedImage = SwingFXUtils.toFXImage(screenCapture, null);
-        BufferedImage bufferedImage = SwingFXUtils.fromFXImage(croppedImage, null);
+        File outputFile = new File(outputDirectory, "screenshot.png");
 
         try {
-            Path tempDir = Paths.get("temp");
-            if (!Files.exists(tempDir)) {
-                Files.createDirectories(tempDir);
-            }
-            File outputFile = new File(tempDir.toFile(), "screenshot.png");
-            ImageIO.write(bufferedImage, "png", outputFile);
-            System.out.println("Screenshot saved at: " + outputFile.getAbsolutePath());
+            ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", outputFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        System.out.println("截图已保存到: " + outputFile.getAbsolutePath());
+
+
         primaryStage.close();
+
     }
+
+
+    public void init() {
+        try {
+            GlobalScreen.registerNativeHook();
+        } catch (NativeHookException e) {
+            System.err.println("There was a problem registering the native hook.");
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+
+        // Disable the default console output to avoid the native key events spamming in the console.
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.OFF);
+        logger.setUseParentHandlers(false);
+
+        // Instantiate ScreenCapture and GlobalKeyListener
+        ScreenCapture screenCapture = new ScreenCapture();
+        GlobalKeyListener globalKeyListener = new GlobalKeyListener(screenCapture);
+        GlobalScreen.addNativeKeyListener(globalKeyListener);
+
+    }
+
+
 }
+

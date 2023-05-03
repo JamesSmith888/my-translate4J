@@ -1,6 +1,5 @@
 package com.jim.mytranslate4j;
 
-import jakarta.annotation.Resource;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -22,20 +21,19 @@ public class HelloWorld extends Application {
     private double startY;
     private Rectangle selectionRectangle;
 
-    @Resource
-    private ScreenCapture screenCapture;
-
 
     public static void main(String[] args) throws AWTException {
         launch(args);
 
-        new ScreenCapture().start(new Stage());
     }
 
     @Override
     public void start(Stage primaryStage) {
-        initUI(primaryStage);
+        initUI();
 
+        // 截屏
+        ScreenCapture screenCapture = new ScreenCapture();
+        screenCapture.init();
 
     }
 
@@ -43,8 +41,9 @@ public class HelloWorld extends Application {
     /**
      * 初始化界面
      */
-    private void initUI(Stage primaryStage) {
-        primaryStage.setTitle("Hello World!");
+    private void initUI() {
+        Stage stage = new Stage();
+        stage.setTitle("Hello World!");
 
         VBox root = new VBox();
 
@@ -71,7 +70,11 @@ public class HelloWorld extends Application {
         children.addAll(accordion);
 
 
-        primaryStage.setScene(new Scene(root, 400, 500));
-        primaryStage.show();
+        stage.setScene(new Scene(root, 400, 500));
+
+
+        stage.show();
+
+
     }
 }
