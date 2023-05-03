@@ -24,7 +24,12 @@
             <version>5.2.0</version>
         </dependency>
 
-
+        <!-- 系统托盘 -->
+        <dependency>
+            <groupId>com.dorkbox</groupId>
+            <artifactId>SystemTray</artifactId>
+            <version>4.2.1</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
         <dependency>

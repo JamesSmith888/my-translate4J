@@ -7,14 +7,20 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @author jim
  */
+@EnableAsync
 @SpringBootApplication
 public class MyTranslate4JApplication extends Application {
 
     public static void main(String[] args) {
+        // 确保是在有的界面环境下运行
+        System.setProperty("java.awt.headless", "false");
+
+
         SpringApplication.run(MyTranslate4JApplication.class, args);
 
 

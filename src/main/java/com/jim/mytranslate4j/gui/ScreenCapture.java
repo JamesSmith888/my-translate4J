@@ -87,8 +87,6 @@ public class ScreenCapture {
         });
 
 
-        System.out.println(applicationEventPublisher);
-
     }
 
 

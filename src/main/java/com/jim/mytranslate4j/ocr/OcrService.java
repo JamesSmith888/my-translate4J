@@ -18,7 +18,13 @@ public interface OcrService {
         tesseract.setDatapath("tessdata");
 
         try {
-            return tesseract.doOCR(imageFile);
+            String s = tesseract.doOCR(imageFile);
+
+            // 替换特殊字符与换行符之类的为空格
+            String s1 = s.replaceAll("[^a-zA-Z0-9\\u4e00-\\u9fa5.，,。？“”]+", " ");
+            // 驼峰替换为空格
+            String s2 = s1.replaceAll("([a-z])([A-Z])", "$1 $2");
+            return s2;
         } catch (TesseractException e) {
             throw new RuntimeException(e);
         }
