@@ -1,5 +1,7 @@
-package com.jim.mytranslate4j;
+package com.jim.mytranslate4j.gui;
 
+import com.jim.mytranslate4j.event.ScreenCaptureEvent;
+import jakarta.annotation.Resource;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -21,6 +23,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -28,19 +32,30 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
- * @author A
+ * @author jim
  */
+@Component
 public class ScreenCapture {
 
     private double startX;
     private double startY;
     private Rectangle selectionRectangle;
-    private Pane pane;
 
+    @Resource
+    private GlobalKeyListener globalKeyListener;
+
+    @Resource
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    /**
+     * 弹出截屏界面
+     */
     public void showOverlay() {
         Stage primaryStage = new Stage();
-        pane = new Pane();
+
+        Pane pane = new Pane();
         Scene scene = new Scene(pane);
 
         pane.setBackground(new Background(new BackgroundFill(Color.rgb(0, 0, 0, 0.5), CornerRadii.EMPTY, Insets.EMPTY)));
@@ -60,7 +75,7 @@ public class ScreenCapture {
 
         primaryStage.show();
 
-        scene.setOnMousePressed(this::onMousePressed);
+        scene.setOnMousePressed(event -> onMousePressed(event, pane));
         scene.setOnMouseDragged(this::onMouseDragged);
         scene.setOnMouseReleased(event -> onMouseReleased(event, primaryStage));
 
@@ -71,10 +86,13 @@ public class ScreenCapture {
             }
         });
 
+
+        System.out.println(applicationEventPublisher);
+
     }
 
 
-    private void onMousePressed(MouseEvent event) {
+    private void onMousePressed(MouseEvent event, Pane pane) {
         if (event.getButton() == MouseButton.PRIMARY) {
             pane.getChildren().remove(selectionRectangle);
 
@@ -115,6 +133,9 @@ public class ScreenCapture {
     }
 
 
+    /**
+     * 截取用户选择的区域并保存到文件
+     */
     private void captureAndSaveScreenshot(Stage primaryStage) {
         // Hide the primaryStage before capturing
         primaryStage.hide();
@@ -150,11 +171,11 @@ public class ScreenCapture {
             e.printStackTrace();
         }
 
-        System.out.println("截图已保存到: " + outputFile.getAbsolutePath());
-
 
         primaryStage.close();
 
+        // 发起已经截图的事件
+        applicationEventPublisher.publishEvent(new ScreenCaptureEvent(this));
     }
 
 
@@ -172,9 +193,7 @@ public class ScreenCapture {
         logger.setLevel(Level.OFF);
         logger.setUseParentHandlers(false);
 
-        // Instantiate ScreenCapture and GlobalKeyListener
-        ScreenCapture screenCapture = new ScreenCapture();
-        GlobalKeyListener globalKeyListener = new GlobalKeyListener(screenCapture);
+        // Instantiate GlobalKeyListener
         GlobalScreen.addNativeKeyListener(globalKeyListener);
 
     }

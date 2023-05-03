@@ -3,6 +3,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+tessdata/
+javafx-sdk-17.0.7/
+temp/
 
 ### STS ###
 .apt_generated

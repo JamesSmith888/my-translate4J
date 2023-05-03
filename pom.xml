@@ -17,6 +17,15 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j -->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>5.2.0</version>
+        </dependency>
+
+
+
         <!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
         <dependency>
             <groupId>com.1stleg</groupId>

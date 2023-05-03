@@ -1,6 +1,6 @@
-package com.jim.mytranslate4j;
+package com.jim.mytranslate4j.gui;
 
-import javafx.application.Application;
+import jakarta.annotation.Resource;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -9,31 +9,26 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 
+/**
+ * @author jim
+ */
 @Component
-public class HelloWorld extends Application {
-    private double startX;
-    private double startY;
-    private Rectangle selectionRectangle;
+public class Start {
+
+    @Resource
+    private ScreenCapture screenCapture;
 
 
-    public static void main(String[] args) throws AWTException {
-        launch(args);
-
-    }
-
-    @Override
-    public void start(Stage primaryStage) {
+    public void start() {
         initUI();
 
         // 截屏
-        ScreenCapture screenCapture = new ScreenCapture();
         screenCapture.init();
+
 
     }
 
