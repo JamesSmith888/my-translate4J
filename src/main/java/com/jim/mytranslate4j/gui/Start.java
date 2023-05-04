@@ -1,24 +1,36 @@
 package com.jim.mytranslate4j.gui;
 
 import com.jim.mytranslate4j.config.Config;
+import com.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
 import jakarta.annotation.Resource;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.*;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
+import java.awt.AWTException;
+import java.awt.EventQueue;
+import java.awt.MediaTracker;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -34,6 +46,11 @@ public class Start {
 
     @Resource
     private Config config;
+
+    @Resource
+    private UntranslatedTextAreaEvent untranslatedTextAreaEvent;
+
+    private Timeline translationTimeline;
 
     private TextArea textArea;
 
@@ -72,9 +89,26 @@ public class Start {
         textArea = new TextArea();
         // 监听文本框的变化
         textArea.textProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("oldValue = " + oldValue);
-            System.out.println("newValue = " + newValue);
+            if (StringUtils.isBlank(newValue)) {
+                return;
+            }
+
+            if (translationTimeline != null) {
+                translationTimeline.stop();
+            }
+
+            translationTimeline = new Timeline(new KeyFrame(Duration.millis(500), event -> {
+                if (!newValue.equals(textArea.getText())) {
+                    System.out.println("文本框内容已经变化，不执行翻译");
+                    return;
+                }
+
+                // 翻译并更新翻译结果
+                untranslatedTextAreaEvent.translated(newValue);
+            }));
+            translationTimeline.play();
         });
+
         TitledPane tilePane1 = new TitledPane("来源", textArea);
 
         // baidu 翻译结果文本框
@@ -134,7 +168,7 @@ public class Start {
         // 创建垂直菜单栏
         ListView<String> settingsMenu = new ListView<>();
         settingsMenu.getItems().addAll("Baidu翻译", "Google翻译", "opus-mt-en-zh");
-        settingsMenu.setPrefWidth(100);
+        settingsMenu.setPrefWidth(110);
 
         // 设置选中事件
         settingsMenu.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -199,7 +233,7 @@ public class Start {
 
 
     /**
-     * 更新textArea的内容
+     * 更新需要翻译的textArea的内容
      */
     public void updateTextArea(String text) {
         textArea.setText(text);

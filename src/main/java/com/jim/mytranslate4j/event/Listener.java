@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * @author jim
@@ -57,4 +58,33 @@ public class Listener {
         // 展示截屏窗口
         screenCapture.showOverlay();
     }
+
+
+    @EventListener
+    public void onApplicationEvent(SelectedTextCaptureEvent event) {
+        // 展示翻译窗口
+        start.showWindow();
+
+        String selectedText = event.getSelectedText();
+
+        // 更新UI以显示OCR结果
+        Platform.runLater(() -> start.updateTextArea(selectedText));
+        // 翻译
+        translates.parallelStream().forEach(translate -> {
+            translate.updateTranslateResult("翻译中...");
+            String translatedText = translate.translate(selectedText);
+            Platform.runLater(() -> translate.updateTranslateResult(translatedText));
+        });
+
+    }
+
+
+    @EventListener
+    public void onApplicationEvent(UpdateTextAreaEvent event) {
+        BiConsumer<Start, String> consumer = event.getTranslateType().getConsumer();
+
+        // 更新UI并显示结果
+        Platform.runLater(() -> consumer.accept(start, event.getTranslatedText()));
+    }
+
 }

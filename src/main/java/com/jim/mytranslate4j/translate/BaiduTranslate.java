@@ -1,8 +1,10 @@
 package com.jim.mytranslate4j.translate;
 
 import com.jim.mytranslate4j.config.Config;
-import com.jim.mytranslate4j.gui.Start;
+import com.jim.mytranslate4j.enums.TranslateType;
+import com.jim.mytranslate4j.event.UpdateTextAreaEvent;
 import jakarta.annotation.Resource;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,10 +30,10 @@ public class BaiduTranslate implements Translate {
     private static final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
 
     @Resource
-    private Start start;
+    private RestTemplate restTemplate;
 
     @Resource
-    private RestTemplate restTemplate;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public String translate(String content) {
@@ -42,7 +44,7 @@ public class BaiduTranslate implements Translate {
 
     @Override
     public void updateTranslateResult(String result) {
-        start.updateBaiduTextArea(result);
+        applicationEventPublisher.publishEvent(new UpdateTextAreaEvent(this, TranslateType.Baidu, result));
     }
 
 
