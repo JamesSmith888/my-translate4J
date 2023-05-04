@@ -30,6 +30,9 @@ public class BaiduTranslate implements Translate {
     @Resource
     private Start start;
 
+    @Resource
+    private RestTemplate restTemplate;
+
     @Override
     public String translate(String content) {
         String translatedText = translateText(content, "en", "zh");
@@ -44,8 +47,6 @@ public class BaiduTranslate implements Translate {
 
 
     public String translateText(String sourceText, String from, String to) {
-        RestTemplate restTemplate = new RestTemplate();
-
         String salt = String.valueOf(System.currentTimeMillis());
         String sign = getMD5(Config.get("baidu.appId").toString() + sourceText + salt + Config.get("baidu.appSecret").toString());
 

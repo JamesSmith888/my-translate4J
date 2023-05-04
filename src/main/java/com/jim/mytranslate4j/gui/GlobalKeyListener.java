@@ -26,6 +26,11 @@ public class GlobalKeyListener implements NativeKeyListener {
             // Show the screen capture overlay
             Platform.runLater(() -> applicationEventPublisher.publishEvent(new ShowOverlayEvent(this)));
         }
+
+        // 判断是否按下alt+z
+        if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_Z && (nativeKeyEvent.getModifiers() & NativeKeyEvent.ALT_MASK) != 0) {
+            System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
+        }
     }
 
     @Override
