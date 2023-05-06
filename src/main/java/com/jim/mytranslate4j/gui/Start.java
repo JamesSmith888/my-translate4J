@@ -56,6 +56,10 @@ public class Start {
 
     private TextArea baiduTextArea;
 
+    private TextArea googleTextArea;
+
+    private TextArea opusMtTextArea;
+
     public void start() {
         // 阻止JavaFX应用程序在最后一个窗口关闭时退出（确保关闭主窗口时不会退出应用程序，导致后续的截屏功能无法使用）
         Platform.setImplicitExit(false);
@@ -115,7 +119,9 @@ public class Start {
         baiduTextArea = new TextArea();
         TitledPane tilePane2 = new TitledPane("baidu", baiduTextArea);
 
-        TitledPane tilePane3 = new TitledPane("opus-mt-en-zh", new Button("button3"));
+        // opus-mt 翻译结果文本框
+        opusMtTextArea = new TextArea();
+        TitledPane tilePane3 = new TitledPane("opus-mt", opusMtTextArea);
 
         vBox.getChildren().addAll(tilePane1, tilePane2, tilePane3);
 
@@ -244,6 +250,13 @@ public class Start {
      */
     public void updateBaiduTextArea(String text) {
         baiduTextArea.setText(text);
+    }
+
+    /**
+     * 更新opusMtTextArea的内容
+     */
+    public void updateOpusMtTextArea(String text) {
+        opusMtTextArea.setText(text);
     }
 
     /**

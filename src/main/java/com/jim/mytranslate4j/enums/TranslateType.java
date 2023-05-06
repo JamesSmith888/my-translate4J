@@ -19,8 +19,7 @@ public enum TranslateType {
     Google((start, str) -> {
     }),
 
-    Opus_mt_en_zh((start, str) -> {
-    });
+    Opus_mt_en_zh(Start::updateOpusMtTextArea);
 
 
     private BiConsumer<Start, String> consumer;

@@ -35,3 +35,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/trans-opus-mt-en-zh/
+/opus-mt-en-zh-local/
