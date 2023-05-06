@@ -1,7 +1,6 @@
 package com.jim.mytranslate4j.translate;
 
 import jakarta.annotation.Resource;
-import javafx.application.Platform;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,9 +19,9 @@ public class TranslateService {
      */
     public void translateAndUpdate(String content) {
         translates.parallelStream().forEach(translate -> {
-            Platform.runLater(() -> translate.updateTranslateResult("翻译中..."));
+            translate.updateTranslateResult("翻译中...");
             String translatedText = translate.translate(content);
-            Platform.runLater(() -> translate.updateTranslateResult(translatedText));
+            translate.updateTranslateResult(translatedText);
         });
     }
 }

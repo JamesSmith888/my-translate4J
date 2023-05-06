@@ -4,6 +4,7 @@ import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.enums.TranslateType;
 import com.jim.mytranslate4j.event.UpdateTextAreaEvent;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +26,7 @@ import java.util.Map;
  * @author jim
  */
 @Component
+@Slf4j
 public class BaiduTranslate implements Translate {
 
     private static final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
@@ -37,9 +39,7 @@ public class BaiduTranslate implements Translate {
 
     @Override
     public String translate(String content) {
-        String translatedText = translateText(content, "en", "zh");
-        System.out.println("Translated text: " + translatedText);
-        return translatedText;
+        return translateText(content, "en", "zh");
     }
 
     @Override
@@ -50,9 +50,9 @@ public class BaiduTranslate implements Translate {
 
     public String translateText(String sourceText, String from, String to) {
         String salt = String.valueOf(System.currentTimeMillis());
-        String sign = getMD5(Config.get("baidu.appId").toString() + sourceText + salt + Config.get("baidu.appSecret").toString());
-
         String encodedSourceText = URLEncoder.encode(sourceText, StandardCharsets.UTF_8);
+        String sign = getMD5(Config.get("baidu.appId").toString() + encodedSourceText + salt + Config.get("baidu.appSecret").toString());
+
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
                 .queryParam("q", encodedSourceText)
                 .queryParam("from", from)
@@ -67,13 +67,15 @@ public class BaiduTranslate implements Translate {
 
         ResponseEntity<Map> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, Map.class);
         Map<String, Object> responseBody = response.getBody();
-        List<Map<String, String>> translatedResults = (List<Map<String, String>>) responseBody.get("trans_result");
+        log.info("baidu translate response: {}", responseBody);
 
+        List<Map<String, String>> translatedResults = (List<Map<String, String>>) responseBody.get("trans_result");
         if (translatedResults != null && !translatedResults.isEmpty()) {
             return translatedResults.get(0).get("dst");
-        } else {
-            return null;
         }
+
+        return null;
+
     }
 
 

@@ -39,24 +39,26 @@ public class Listener {
 
         String ocr = ocrService.doOcr();
 
-        // 更新UI以显示OCR结果
+        // 显示OCR结果
         Platform.runLater(() -> start.updateTextArea(ocr));
 
 
         // 翻译
-        translates.parallelStream().forEach(translate -> {
+/*        translates.parallelStream().forEach(translate -> {
+            System.out.println("开始翻译...");
             translate.updateTranslateResult("翻译中...");
 
             String translatedText = translate.translate(ocr);
             Platform.runLater(() -> translate.updateTranslateResult(translatedText));
-        });
+        });*/
     }
 
 
     @EventListener
+    @Async
     public void onApplicationEvent(ShowOverlayEvent event) {
         // 展示截屏窗口
-        screenCapture.showOverlay();
+        Platform.runLater(() -> screenCapture.showOverlay());
     }
 
 
@@ -80,11 +82,12 @@ public class Listener {
 
 
     @EventListener
+    @Async
     public void onApplicationEvent(UpdateTextAreaEvent event) {
         BiConsumer<Start, String> consumer = event.getTranslateType().getConsumer();
 
         // 更新UI并显示结果
-        Platform.runLater(() -> consumer.accept(start, event.getTranslatedText()));
+        consumer.accept(start, event.getTranslatedText());
     }
 
 }

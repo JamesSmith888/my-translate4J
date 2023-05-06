@@ -24,31 +24,6 @@ public class GlobalKeyListener implements NativeKeyListener {
     @Resource
     private ApplicationEventPublisher applicationEventPublisher;
 
-
-    @Override
-    public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent) {
-        System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
-        if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_S && (nativeKeyEvent.getModifiers() & NativeKeyEvent.ALT_MASK) != 0) {
-            // Show the screen capture overlay
-            Platform.runLater(() -> applicationEventPublisher.publishEvent(new ShowOverlayEvent(this)));
-        }
-
-        // 判断是否按下alt+z
-        if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_Z && (nativeKeyEvent.getModifiers() & NativeKeyEvent.ALT_MASK) != 0) {
-
-
-            Platform.runLater(() -> {
-                try {
-                    applicationEventPublisher.publishEvent(new SelectedTextCaptureEvent(this, getSelectedText()));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-
-        }
-    }
-
     public static String getSelectedText() throws IOException {
         System.out.println("start time: " + System.currentTimeMillis());
 
@@ -69,6 +44,28 @@ public class GlobalKeyListener implements NativeKeyListener {
         return s;
     }
 
+    @Override
+    public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent) {
+        if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_S && (nativeKeyEvent.getModifiers() & NativeKeyEvent.ALT_MASK) != 0) {
+            // Show the screen capture overlay
+            applicationEventPublisher.publishEvent(new ShowOverlayEvent(this));
+        }
+
+        // 判断是否按下alt+z
+        if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_Z && (nativeKeyEvent.getModifiers() & NativeKeyEvent.ALT_MASK) != 0) {
+
+
+            Platform.runLater(() -> {
+                try {
+                    applicationEventPublisher.publishEvent(new SelectedTextCaptureEvent(this, getSelectedText()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+
+        }
+    }
 
     @Override
     public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) {

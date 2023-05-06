@@ -20,11 +20,10 @@ public interface OcrService {
         try {
             String s = tesseract.doOCR(imageFile);
 
-            // 替换特殊字符与换行符之类的为空格
-            String s1 = s.replaceAll("[^a-zA-Z0-9\\u4e00-\\u9fa5.，,。？“”]+", " ");
-            // 驼峰替换为空格
-            String s2 = s1.replaceAll("([a-z])([A-Z])", "$1 $2");
-            return s2;
+
+            // 替换驼峰-_为空格
+            s = s.replaceAll("([a-z])([A-Z])", "$1 $2");
+            return s;
         } catch (TesseractException e) {
             throw new RuntimeException(e);
         }
