@@ -2,6 +2,7 @@ package com.jim.mytranslate4j.gui;
 
 import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
+import com.jim.mytranslate4j.translate.Translate;
 import jakarta.annotation.Resource;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -33,6 +34,7 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 
 /**
@@ -59,6 +61,9 @@ public class Start {
     private TextArea googleTextArea;
 
     private TextArea opusMtTextArea;
+
+    @Resource
+    private List<Translate> translates;
 
     public void start() {
         // 阻止JavaFX应用程序在最后一个窗口关闭时退出（确保关闭主窗口时不会退出应用程序，导致后续的截屏功能无法使用）
@@ -89,6 +94,7 @@ public class Start {
         // 菜单栏
         initMenuBar(vBox);
 
+
         // 来源文本框
         textArea = new TextArea();
         // 监听文本框的变化
@@ -107,11 +113,12 @@ public class Start {
                     return;
                 }
 
-                // 翻译并更新翻译结果
                 untranslatedTextAreaEvent.translated(newValue);
+
             }));
             translationTimeline.play();
         });
+
 
         TitledPane tilePane1 = new TitledPane("来源", textArea);
 
@@ -249,14 +256,14 @@ public class Start {
      * 更新baiduTextArea的内容
      */
     public void updateBaiduTextArea(String text) {
-        baiduTextArea.setText(text);
+        Platform.runLater(() -> baiduTextArea.setText(text));
     }
 
     /**
      * 更新opusMtTextArea的内容
      */
     public void updateOpusMtTextArea(String text) {
-        opusMtTextArea.setText(text);
+        Platform.runLater(() -> opusMtTextArea.setText(text));
     }
 
     /**

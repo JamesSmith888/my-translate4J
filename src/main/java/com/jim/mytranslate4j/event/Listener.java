@@ -35,13 +35,15 @@ public class Listener {
     @EventListener
     @Async
     public void onApplicationEvent(ScreenCaptureEvent event) {
-        Platform.runLater(() -> start.showWindow());
+        Platform.runLater(() -> {
+            start.showWindow();
 
-        String ocr = ocrService.doOcr();
+            String ocr = ocrService.doOcr();
 
-        // 显示OCR结果
-        Platform.runLater(() -> start.updateTextArea(ocr));
+            // 显示OCR结果
+            start.updateTextArea(ocr);
 
+        });
 
         // 翻译
 /*        translates.parallelStream().forEach(translate -> {

@@ -11,11 +11,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.math.BigInteger;
-import java.net.URLEncoder;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 public class BaiduTranslate implements Translate {
 
-    private static final String API_URL = "https://fanyi-api.baidu.com/api/trans/vip/translate";
+    private static final String API_URL = "https://api.fanyi.baidu.com/api/trans/vip/translate";
 
     @Resource
     private RestTemplate restTemplate;
@@ -39,7 +39,7 @@ public class BaiduTranslate implements Translate {
 
     @Override
     public String translate(String content) {
-        return translateText(content, "en", "zh");
+        return translateText(content, "auto", "zh");
     }
 
     @Override
@@ -49,50 +49,54 @@ public class BaiduTranslate implements Translate {
 
 
     public String translateText(String sourceText, String from, String to) {
+        sourceText.replace("+", "%2B");
         String salt = String.valueOf(System.currentTimeMillis());
-        String encodedSourceText = URLEncoder.encode(sourceText, StandardCharsets.UTF_8);
-        String sign = getMD5(Config.get("baidu.appId").toString() + encodedSourceText + salt + Config.get("baidu.appSecret").toString());
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(API_URL)
-                .queryParam("q", encodedSourceText)
+        String sign = md5(Config.get("baidu.appId").toString() + sourceText + salt + Config.get("baidu.appSecret").toString());
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(API_URL)
+                .queryParam("q", sourceText)
                 .queryParam("from", from)
                 .queryParam("to", to)
-                .queryParam("appid", Config.get("baidu.appId").toString())
+                .queryParam("appid", "20230425001655623")
                 .queryParam("salt", salt)
-                .queryParam("sign", sign);
+                .queryParam("sign", sign)
+                .build()
+                .toUri();
 
 
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
         Map<String, Object> responseBody = response.getBody();
         log.info("baidu translate response: {}", responseBody);
 
         List<Map<String, String>> translatedResults = (List<Map<String, String>>) responseBody.get("trans_result");
-        if (translatedResults != null && !translatedResults.isEmpty()) {
-            return translatedResults.get(0).get("dst");
+        if (CollectionUtils.isEmpty(translatedResults)) {
+            return null;
         }
 
-        return null;
-
+        return translatedResults.stream()
+                .map(result -> result.get("dst"))
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
     }
-
 
     /**
      * MD5 ，得到 32 位小写的 sign。
      */
-    private String getMD5(String input) {
+    private static String md5(String str) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(input.getBytes(StandardCharsets.UTF_8));
-            String hash = new BigInteger(1, md.digest()).toString(16);
-            while (hash.length() < 32) {
-                hash = "0" + hash;
+            byte[] array = md.digest(str.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : array) {
+                sb.append(String.format("%02x", b));
             }
-            return hash;
+            return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD5 签名计算失败", e);
+            throw new RuntimeException("MD5加密错误", e);
         }
     }
 
