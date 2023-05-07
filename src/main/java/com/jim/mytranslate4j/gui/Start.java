@@ -2,23 +2,20 @@ package com.jim.mytranslate4j.gui;
 
 import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
-import com.jim.mytranslate4j.translate.Translate;
 import jakarta.annotation.Resource;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -26,15 +23,9 @@ import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.awt.AWTException;
-import java.awt.EventQueue;
-import java.awt.MediaTracker;
-import java.awt.SystemTray;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 
 
 /**
@@ -52,18 +43,18 @@ public class Start {
     @Resource
     private UntranslatedTextAreaEvent untranslatedTextAreaEvent;
 
+    @Resource
+    private JavaFXComponent javaFXComponent;
+
     private Timeline translationTimeline;
 
     private TextArea textArea;
 
     private TextArea baiduTextArea;
 
-    private TextArea googleTextArea;
-
     private TextArea opusMtTextArea;
 
-    @Resource
-    private List<Translate> translates;
+    private Stage stage;
 
     public void start() {
         // 阻止JavaFX应用程序在最后一个窗口关闭时退出（确保关闭主窗口时不会退出应用程序，导致后续的截屏功能无法使用）
@@ -83,10 +74,10 @@ public class Start {
      * 初始化界面
      */
     private Stage initUi() {
-        Stage stage = new Stage();
+        stage = new Stage();
         stage.setTitle("My Translate");
         // 设置任务栏图标
-        javafx.scene.image.Image image = new javafx.scene.image.Image(getClass().getResourceAsStream("/img/icon.png"));
+        javafx.scene.image.Image image = new javafx.scene.image.Image(getClass().getResourceAsStream("/img/translate.png"));
         stage.getIcons().add(image);
 
         VBox vBox = new VBox();
@@ -107,7 +98,7 @@ public class Start {
                 translationTimeline.stop();
             }
 
-            translationTimeline = new Timeline(new KeyFrame(Duration.millis(500), event -> {
+            translationTimeline = new Timeline(new KeyFrame(Duration.millis(1000), event -> {
                 if (!newValue.equals(textArea.getText())) {
                     System.out.println("文本框内容已经变化，不执行翻译");
                     return;
@@ -120,15 +111,27 @@ public class Start {
         });
 
 
-        TitledPane tilePane1 = new TitledPane("来源", textArea);
+        TitledPane tilePane1 = new TitledPane("", textArea);
+        // 隐藏标题栏
+        tilePane1.setCollapsible(false);
 
         // baidu 翻译结果文本框
         baiduTextArea = new TextArea();
-        TitledPane tilePane2 = new TitledPane("baidu", baiduTextArea);
+        TitledPane tilePane2 = new TitledPane("", baiduTextArea);
+        // 标题图标
+        tilePane2.setGraphic(javaFXComponent.graphicImg("/img/baidu.png"));
+        // 隐藏标题栏
+        tilePane2.setCollapsible(false);
+
 
         // opus-mt 翻译结果文本框
         opusMtTextArea = new TextArea();
         TitledPane tilePane3 = new TitledPane("opus-mt", opusMtTextArea);
+        // 标题图标
+        tilePane3.setGraphic(javaFXComponent.graphicImg("/img/opus_mt.jpg"));
+        // 隐藏标题栏
+        tilePane3.setCollapsible(false);
+
 
         vBox.getChildren().addAll(tilePane1, tilePane2, tilePane3);
 
@@ -139,6 +142,20 @@ public class Start {
         stage.setOnCloseRequest(event -> {
             event.consume(); // 阻止默认关闭操作
             stage.hide(); // 隐藏窗口
+        });
+
+        // 窗口隐藏时，清空文本框内容
+        stage.setOnHidden(event -> {
+            textArea.setText("");
+            baiduTextArea.setText("");
+            opusMtTextArea.setText("");
+        });
+
+        // esc键隐藏窗口
+        stage.addEventHandler(javafx.scene.input.KeyEvent.KEY_RELEASED, event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                stage.hide();
+            }
         });
 
 
@@ -249,7 +266,7 @@ public class Start {
      * 更新需要翻译的textArea的内容
      */
     public void updateTextArea(String text) {
-        textArea.setText(text);
+        Platform.runLater(() -> textArea.setText(text));
     }
 
     /**
@@ -270,18 +287,19 @@ public class Start {
      * 判断窗口是否已经显示，如果没有显示，则显示窗口
      */
     public void showWindow() {
-        Stage stage = (Stage) textArea.getScene().getWindow();
-        if (!stage.isShowing()) {
-            stage.show();
-        }
+        Platform.runLater(() -> {
+            if (!stage.isShowing()) {
+                stage.show();
+            }
 
-        // 将窗口置于最前
-        stage.toFront();
+            // 将窗口置于最前
+            stage.toFront();
+        });
     }
 
 
     private void initTrayIcon(Stage stage) {
-        java.awt.Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/icon.png"));
+        java.awt.Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/img/translate.png"));
 
         // 确保图片已加载
         MediaTracker tracker = new MediaTracker(new java.awt.Container());

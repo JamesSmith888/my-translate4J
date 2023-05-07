@@ -23,6 +23,7 @@ public class TranslateService {
         // 为每个翻译任务创建一个 CompletableFuture
         translates.forEach(translate -> {
             executorService.submit(() -> {
+                translate.updateTranslateResult("翻译中...");
                 String translatedText = translate.translate(content);
                 translate.updateTranslateResult(translatedText);
             });

@@ -39,7 +39,6 @@ public class OpusMtTranslate implements Translate {
                 output.append(line);
             }
 
-            System.out.println("Error:");
             while ((line = errorReader.readLine()) != null) {
                 System.out.println(line);
             }
