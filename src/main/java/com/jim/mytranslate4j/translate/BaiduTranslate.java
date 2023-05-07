@@ -3,6 +3,7 @@ package com.jim.mytranslate4j.translate;
 import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.enums.TranslateType;
 import com.jim.mytranslate4j.event.UpdateTextAreaEvent;
+import com.jim.mytranslate4j.translate.baidu.TransApi;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -37,9 +38,12 @@ public class BaiduTranslate implements Translate {
     @Resource
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Resource
+    private TransApi transApi;
+
     @Override
     public String translate(String content) {
-        return translateText(content, "auto", "zh");
+        return transApi.getTranslationValue(content);
     }
 
     @Override
