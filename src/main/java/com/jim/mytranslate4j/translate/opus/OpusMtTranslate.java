@@ -1,8 +1,8 @@
-package com.jim.mytranslate4j.translate;
+package com.jim.mytranslate4j.translate.opus;
 
 import com.jim.mytranslate4j.enums.TranslateType;
 import com.jim.mytranslate4j.event.UpdateTextAreaEvent;
-import com.jim.mytranslate4j.translate.opus.Translator;
+import com.jim.mytranslate4j.translate.Translate;
 import jakarta.annotation.Resource;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;

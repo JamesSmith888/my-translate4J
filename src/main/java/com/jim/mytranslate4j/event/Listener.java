@@ -9,7 +9,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * @author jim
@@ -61,10 +61,10 @@ public class Listener {
     @EventListener
     @Async
     public void onApplicationEvent(UpdateTextAreaEvent event) {
-        BiConsumer<Start, String> consumer = event.getTranslateType().getConsumer();
+        Consumer<String> consumer = event.getTranslateType().getConsumer();
 
         // 更新UI并显示结果
-        consumer.accept(start, event.getTranslatedText());
+        consumer.accept(event.getTranslatedText());
     }
 
 }

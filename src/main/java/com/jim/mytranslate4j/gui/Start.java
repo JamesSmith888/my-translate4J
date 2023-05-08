@@ -2,11 +2,15 @@ package com.jim.mytranslate4j.gui;
 
 import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
+import com.jim.mytranslate4j.gui.pane.TranslatePane;
+import com.jim.mytranslate4j.gui.pane.TranslatePaneService;
 import jakarta.annotation.Resource;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,11 +25,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 
 /**
@@ -44,7 +50,13 @@ public class Start {
     private UntranslatedTextAreaEvent untranslatedTextAreaEvent;
 
     @Resource
-    private JavaFXComponent javaFXComponent;
+    private JavaFxComponent javaFxComponent;
+
+    @Autowired
+    private List<TranslatePane> translatePanes;
+
+    @Resource
+    private TranslatePaneService translatePaneService;
 
     private Timeline translationTimeline;
 
@@ -55,6 +67,7 @@ public class Start {
     private TextArea opusMtTextArea;
 
     private Stage stage;
+
 
     public void start() {
         // 阻止JavaFX应用程序在最后一个窗口关闭时退出（确保关闭主窗口时不会退出应用程序，导致后续的截屏功能无法使用）
@@ -111,29 +124,16 @@ public class Start {
         });
 
 
-        TitledPane tilePane1 = new TitledPane("", textArea);
+        TitledPane titledPane = new TitledPane("", textArea);
         // 隐藏标题栏
-        tilePane1.setCollapsible(false);
-
-        // baidu 翻译结果文本框
-        baiduTextArea = new TextArea();
-        TitledPane tilePane2 = new TitledPane("", baiduTextArea);
-        // 标题图标
-        tilePane2.setGraphic(javaFXComponent.graphicImg("/img/baidu.png"));
-        // 隐藏标题栏
-        tilePane2.setCollapsible(false);
+        titledPane.setCollapsible(false);
 
 
-        // opus-mt 翻译结果文本框
-        opusMtTextArea = new TextArea();
-        TitledPane tilePane3 = new TitledPane("opus-mt", opusMtTextArea);
-        // 标题图标
-        tilePane3.setGraphic(javaFXComponent.graphicImg("/img/opus_mt.jpg"));
-        // 隐藏标题栏
-        tilePane3.setCollapsible(false);
+        ObservableList<Node> children = vBox.getChildren();
+        children.add(titledPane);
 
 
-        vBox.getChildren().addAll(tilePane1, tilePane2, tilePane3);
+        translatePanes.forEach(f -> children.add(f.pane()));
 
 
         stage.setScene(new Scene(vBox, 400, 500));
@@ -145,11 +145,7 @@ public class Start {
         });
 
         // 窗口隐藏时，清空文本框内容
-        stage.setOnHidden(event -> {
-            textArea.setText("");
-            baiduTextArea.setText("");
-            opusMtTextArea.setText("");
-        });
+        stage.setOnHidden(event -> translatePaneService.clear());
 
         // esc键隐藏窗口
         stage.addEventHandler(javafx.scene.input.KeyEvent.KEY_RELEASED, event -> {

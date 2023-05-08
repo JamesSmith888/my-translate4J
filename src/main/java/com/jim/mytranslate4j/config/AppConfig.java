@@ -58,7 +58,7 @@ public class AppConfig {
 
 
         // 预热 RestTemplate
-        warmUpRestTemplate(restTemplate);
+        //warmUpRestTemplate(restTemplate);
 
         return restTemplate;
     }
