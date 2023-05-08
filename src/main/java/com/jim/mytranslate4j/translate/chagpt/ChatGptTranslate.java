@@ -34,7 +34,7 @@ public class ChatGptTranslate implements Translate {
         Proxy proxy = Proxys.http("127.0.0.1", 7890);
 
         ChatGPT chatGPT = ChatGPT.builder()
-                .apiKey("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")
+                .apiKey("sk-xxx")
                 .proxy(proxy)
                 .timeout(900)
                 .apiHost("https://api.openai.com/") //反向代理地址
