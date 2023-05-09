@@ -193,7 +193,7 @@ public class Start {
 
         // 创建垂直菜单栏
         ListView<String> settingsMenu = new ListView<>();
-        settingsMenu.getItems().addAll("Baidu翻译", "Google翻译", "opus-mt-en-zh");
+        settingsMenu.getItems().addAll("Baidu翻译", "Google翻译", "opus-mt-en-zh", "chatgpt");
         settingsMenu.setPrefWidth(110);
 
         // 设置选中事件
@@ -204,6 +204,12 @@ public class Start {
             } else if ("Google翻译".equals(newValue)) {
                 // 显示Google翻译设置面板
                 showGoogleSettings(settingsRoot);
+            }else if ("opus-mt-en-zh".equals(newValue)) {
+                // 显示opus-mt-en-zh设置面板
+                showOpusMtEnZhSettings(settingsRoot);
+            }else if ("chatgpt".equals(newValue)) {
+                // 显示chatgpt设置面板
+                showChatGptSettings(settingsRoot);
             }
         });
 
@@ -213,6 +219,17 @@ public class Start {
 
         settingsStage.setScene(new Scene(settingsRoot, 500, 300));
         settingsStage.show();
+    }
+
+    private void showChatGptSettings(BorderPane settingsRoot) {
+        VBox gptForm = new VBox(10);
+        gptForm.setPadding(new Insets(10));
+
+        settingsRoot.setCenter(gptForm);
+    }
+
+    private void showOpusMtEnZhSettings(BorderPane settingsRoot) {
+
     }
 
     private void showBaiduSettings(BorderPane settingsRoot) {
