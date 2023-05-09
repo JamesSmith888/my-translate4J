@@ -4,6 +4,7 @@ import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
 import com.jim.mytranslate4j.gui.pane.TranslatePane;
 import com.jim.mytranslate4j.gui.pane.TranslatePaneService;
+import com.plexpt.chatgpt.entity.chat.ChatCompletion;
 import jakarta.annotation.Resource;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -204,10 +206,10 @@ public class Start {
             } else if ("Google翻译".equals(newValue)) {
                 // 显示Google翻译设置面板
                 showGoogleSettings(settingsRoot);
-            }else if ("opus-mt-en-zh".equals(newValue)) {
+            } else if ("opus-mt-en-zh".equals(newValue)) {
                 // 显示opus-mt-en-zh设置面板
                 showOpusMtEnZhSettings(settingsRoot);
-            }else if ("chatgpt".equals(newValue)) {
+            } else if ("chatgpt".equals(newValue)) {
                 // 显示chatgpt设置面板
                 showChatGptSettings(settingsRoot);
             }
@@ -225,6 +227,39 @@ public class Start {
         VBox gptForm = new VBox(10);
         gptForm.setPadding(new Insets(10));
 
+        // chatgpt token输入框
+        Label tokenLabel = new Label("token:");
+        TextField tokenField = new TextField();
+        // chatgpt 模型选择GPT_3_5_TURBO/4.0
+        Label modelLabel = new Label("模型:");
+        ChoiceBox<String> modelChoiceBox = new ChoiceBox<>();
+
+        modelChoiceBox.getItems().addAll(Arrays.stream(ChatCompletion.Model.values()).map(Enum::name).toList());
+        modelChoiceBox.setValue(ChatCompletion.Model.GPT_3_5_TURBO.name());
+
+
+        // 保存按钮
+        Button submitButton = new Button("保存");
+        submitButton.setOnAction(event -> {
+            // 处理提交表单操作
+            System.out.println("token: " + tokenField.getText());
+            System.out.println("模型: " + modelChoiceBox.getValue());
+
+            // 将配置保存到config.yml文件中
+            Config.set("chatgpt.token", tokenField.getText());
+            Config.set("chatgpt.model", modelChoiceBox.getValue());
+            config.saveConfig();
+
+            // 显示保存成功提示
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("保存成功");
+            alert.setHeaderText(null);
+            alert.setContentText("配置已成功保存。现在可以关闭设置窗口。");
+            alert.show();
+        });
+
+
+        gptForm.getChildren().addAll(tokenLabel, tokenField, modelLabel, modelChoiceBox, submitButton);
         settingsRoot.setCenter(gptForm);
     }
 
@@ -255,7 +290,7 @@ public class Start {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("保存成功");
             alert.setHeaderText(null);
-            alert.setContentText("配置已成功保存。");
+            alert.setContentText("配置已成功保存。现在可以关闭设置窗口。");
             alert.show();
 
         });

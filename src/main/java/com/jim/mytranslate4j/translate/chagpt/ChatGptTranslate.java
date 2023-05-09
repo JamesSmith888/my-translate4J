@@ -1,5 +1,6 @@
 package com.jim.mytranslate4j.translate.chagpt;
 
+import com.jim.mytranslate4j.config.Config;
 import com.jim.mytranslate4j.enums.TranslateType;
 import com.jim.mytranslate4j.event.UpdateTextAreaEvent;
 import com.jim.mytranslate4j.translate.Translate;
@@ -28,13 +29,16 @@ public class ChatGptTranslate implements Translate {
     @Resource
     private Translator translator;
 
+    @Resource
+    private Config config;
+
     @Override
     public String translate(String content) {
         //国内需要代理 国外不需要
         Proxy proxy = Proxys.http("127.0.0.1", 7890);
 
         ChatGPT chatGPT = ChatGPT.builder()
-                .apiKey("sk-xxx")
+                .apiKey(Config.get("chatgpt.token").toString())
                 .proxy(proxy)
                 .timeout(900)
                 .apiHost("https://api.openai.com/") //反向代理地址
@@ -44,8 +48,9 @@ public class ChatGptTranslate implements Translate {
         Message system = Message.ofSystem("下面我让你来充当翻译家，你的目标是把任何语言翻译成中文，请翻译时不要带翻译腔，而是要翻译得自然、流畅和地道，使用优美和高雅的表达方式。记住用中文表达，不要用英文表达。");
         Message message = Message.of(content);
 
+
         ChatCompletion chatCompletion = ChatCompletion.builder()
-                .model(ChatCompletion.Model.GPT_3_5_TURBO.getName())
+                .model(Config.get("chatgpt.model").toString())
                 .messages(Arrays.asList(system, message))
                 .maxTokens(3000)
                 .temperature(0.9)
