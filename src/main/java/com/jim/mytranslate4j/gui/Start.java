@@ -237,7 +237,6 @@ public class Start {
         modelChoiceBox.getItems().addAll(Arrays.stream(ChatCompletion.Model.values()).map(Enum::name).toList());
         modelChoiceBox.setValue(ChatCompletion.Model.GPT_3_5_TURBO.name());
 
-
         // 保存按钮
         Button submitButton = new Button("保存");
         submitButton.setOnAction(event -> {
