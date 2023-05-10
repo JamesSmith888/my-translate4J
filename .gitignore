@@ -7,6 +7,7 @@ tessdata/
 javafx-sdk-17.0.7/
 temp/
 src/main/resources/config.yml
+/plugins/*
 
 ### STS ###
 .apt_generated

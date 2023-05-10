@@ -17,6 +17,21 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.jim</groupId>
+            <artifactId>my-translate4J-plugin-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>C:\maven\repository\org\jim\my-translate4J-plugin-api\1.0-SNAPSHOT\my-translate4J-plugin-api-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.openpnp/opencv -->
+        <dependency>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.7.0-0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.github.plexpt/chatgpt -->
         <dependency>
             <groupId>com.github.plexpt</groupId>
