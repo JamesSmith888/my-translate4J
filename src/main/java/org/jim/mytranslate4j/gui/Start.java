@@ -1,9 +1,5 @@
 package org.jim.mytranslate4j.gui;
 
-import org.jim.mytranslate4j.config.Config;
-import org.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
-import org.jim.mytranslate4j.gui.pane.TranslatePane;
-import org.jim.mytranslate4j.gui.pane.TranslatePaneService;
 import com.plexpt.chatgpt.entity.chat.ChatCompletion;
 import jakarta.annotation.Resource;
 import javafx.animation.KeyFrame;
@@ -26,6 +22,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
+import org.jim.mytranslate4j.config.Config;
+import org.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
+import org.jim.mytranslate4j.gui.pane.TranslatePane;
+import org.jim.mytranslate4j.gui.pane.TranslatePaneService;
+import org.jim.mytranslate4j.plugin.PluginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,9 +52,6 @@ public class Start {
     @Resource
     private UntranslatedTextAreaEvent untranslatedTextAreaEvent;
 
-    @Resource
-    private JavaFxComponent javaFxComponent;
-
     @Autowired
     private List<TranslatePane> translatePanes;
 
@@ -64,11 +62,11 @@ public class Start {
 
     private TextArea textArea;
 
-    private TextArea baiduTextArea;
-
-    private TextArea opusMtTextArea;
-
     private Stage stage;
+
+
+    @Resource
+    private PluginService pluginService;
 
 
     public void start() {
@@ -121,6 +119,9 @@ public class Start {
 
                 untranslatedTextAreaEvent.translated(newValue);
 
+                // 插件翻译并且对应的翻译面板显示翻译结果
+                pluginService.translateAndShow(newValue);
+
             }));
             translationTimeline.play();
         });
@@ -136,6 +137,9 @@ public class Start {
 
 
         translatePanes.forEach(f -> children.add(f.pane()));
+
+        // 创建插件面板
+        children.addAll(pluginService.initPluginPane());
 
 
         stage.setScene(new Scene(vBox, 400, 500));
@@ -162,6 +166,7 @@ public class Start {
 
         return stage;
     }
+
 
     /**
      * 菜单栏

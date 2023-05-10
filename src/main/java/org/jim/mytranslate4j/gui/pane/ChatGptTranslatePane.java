@@ -13,7 +13,7 @@ public class ChatGptTranslatePane implements TranslatePane {
 
     @Override
     public String path() {
-        return "/img/openai.jpg";
+        return "openai.jpg";
     }
 
     @Override

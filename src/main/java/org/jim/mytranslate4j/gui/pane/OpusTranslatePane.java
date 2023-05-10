@@ -17,7 +17,7 @@ public class OpusTranslatePane implements TranslatePane {
 
     @Override
     public String path() {
-        return "/img/opus_mt.jpg";
+        return "opus_mt.jpg";
     }
 
     @Override

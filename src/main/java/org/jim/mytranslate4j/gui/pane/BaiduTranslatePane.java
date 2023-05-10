@@ -14,7 +14,7 @@ public class BaiduTranslatePane implements TranslatePane {
 
     @Override
     public String path() {
-        return "/img/baidu.png";
+        return "baidu.png";
     }
 
     @Override

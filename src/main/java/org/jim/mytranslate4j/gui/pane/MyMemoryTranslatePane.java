@@ -17,7 +17,7 @@ public class MyMemoryTranslatePane implements TranslatePane {
 
     @Override
     public String path() {
-        return "/img/myMemory.jpg";
+        return "myMemory.jpg";
     }
 
     @Override

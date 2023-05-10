@@ -1,6 +1,7 @@
 package org.jim.mytranslate4j.gui.pane;
 
 import javafx.application.Platform;
+import javafx.scene.control.TextArea;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +20,8 @@ public class TranslatePaneService {
         translatePanes.forEach(TranslatePane::clear);
     }
 
-    public void updateTextArea(TranslatePane translatePane, String text) {
-        translatePanes.forEach(f -> Platform.runLater(() -> f.textArea().setText(text)));
+    public void updateTextArea(TextArea textArea, String text) {
+        Platform.runLater(() -> textArea.setText(text));
     }
 
 }
