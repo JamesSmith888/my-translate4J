@@ -1,7 +1,7 @@
 My-Translate4J
 ==============
 
-My-Translate4J 是一个基于Spring Boot 3.x、Python 3.10.x、PowerShell 和 JavaFX 的 Windows 桌面客户端翻译软件。它支持多种翻译来源，如百度翻译（需要申请 API）、ChatGPT（需要申请 token 和本地代理）、MyMemory 和 Opus\_mt\_en\_zh（需要下载翻译模型）。
+My-Translate4J 是一个基于Jdk17、Spring Boot 3.0.6、Python 3.10、PowerShell 和 JavaFX 的 Windows 桌面客户端翻译软件，但目前还处于开发优化阶段，适合有相关知识的开发者。它支持多种翻译来源，如百度翻译（需要申请 API）、ChatGPT（需要申请 token 和本地代理）、MyMemory 和 Opus\_mt\_en\_zh（需要下载翻译模型）。
 
 该软件还支持插件/扩展功能，基于 SPI 实现。插件 SDK 和插件 demo 可在以下链接中找到：
 
@@ -12,8 +12,6 @@ OCR 识图功能基于 Tess4J 项目，目前英文识别效果较好，但中�
 
 使用快捷键 Alt+S 进行截图翻译，Alt+Z 对选中的文本进行翻译。请注意检查是否有快捷键冲突。
 
-点击左上角可切换中文/English 文档。
-
 如何开始
 ----
 
@@ -21,7 +19,6 @@ OCR 识图功能基于 Tess4J 项目，目前英文识别效果较好，但中�
 
 由于新版本的 JDK 已经剥离了 JavaFX 相关的库，您需要手动下载并导入到项目中。运行时请添加以下 VM 选项：
 
-css
 
 ```css
 --module-path javafx路径/lib --add-modules javafx.controls,javafx.fxml
@@ -35,7 +32,7 @@ css
 
 ### OCR 识图模型
 
-从 Tess4J 官网下载相关模型，并放入项目的 `tessdata` 文件夹中。
+从 Tesseract 官网下载相关模型，并放入项目的 `tessdata` 文件夹中。
 
 贡献
 --
@@ -52,7 +49,7 @@ css
 My-Translate4J
 ==============
 
-My-Translate4J is a desktop translation software for Windows, built with Spring Boot 3.x, Python 3.10.x, PowerShell, and JavaFX. It supports various translation sources, such as Baidu Translate (requires API application), ChatGPT (requires token and local proxy application), MyMemory, and Opus\_mt\_en\_zh (requires translation model download).
+My-Translate4J is a desktop translation software for Windows, built with Jdk17、Spring Boot 3.0.6, Python 3.10, PowerShell, and JavaFX,but currently, it is still in the development and optimization stage, suitable for developers with relevant knowledge. It supports various translation sources, such as Baidu Translate (requires API application), ChatGPT (requires token and local proxy application), MyMemory, and Opus\_mt\_en\_zh (requires translation model download).
 
 The software also supports plugin/extension features, implemented based on SPI. The plugin SDK and plugin demo can be found in the following links:
 
@@ -87,7 +84,7 @@ Download all files from the link below and place them in the `opus-mt-en-zh-loca
 
 ### OCR Image Recognition Model
 
-Download the relevant models from the Tess4J official website and place them in the `tessdata` folder of the project.
+Download the relevant models from the Tesseract official website and place them in the `tessdata` folder of the project.
 
 Contributing
 ------------
