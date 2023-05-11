@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import javafx.scene.control.TitledPane;
 import org.jim.TranslatePlugin;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.ServiceLoader;
@@ -54,7 +55,7 @@ public class PluginService {
      */
     public void translateAndShow(String newValue) {
         List<TranslatePluginAdapter> pluginAdapters = getPluginAdapters();
-        if (pluginAdapters == null) {
+        if (CollectionUtils.isEmpty(pluginAdapters)) {
             return;
         }
 

@@ -3,6 +3,8 @@ My-Translate4J
 
 My-Translate4J 是一个基于Jdk17、Spring Boot 3.0.6、Python 3.10、PowerShell 和 JavaFX 的 Windows 桌面客户端翻译软件，但目前还处于开发优化阶段，适合有相关知识的开发者。它支持多种翻译来源，如百度翻译（需要申请 API）、ChatGPT（需要申请 token 和本地代理）、MyMemory 和 Opus\_mt\_en\_zh（需要下载翻译模型）。
 
+![My-Translate4J GUI](src/main/resources/img/gui.png)
+
 该软件还支持插件/扩展功能，基于 SPI 实现。插件 SDK 和插件 demo 可在以下链接中找到：
 
 *   插件 SDK：[https://github.com/youdontknow-hash/my-translate4J-plugin-api](https://github.com/youdontknow-hash/my-translate4J-plugin-api)
