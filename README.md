@@ -23,7 +23,7 @@ OCR 识图功能基于 Tess4J 项目，目前英文识别效果较好，但中�
 
 
 ```css
---module-path javafx路径/lib --add-modules javafx.controls,javafx.fxml
+--module-path javafx_path/lib --add-modules javafx.controls,javafx.fxml
 ```
 
 ### Opus\_mt\_en\_zh 翻译模型
