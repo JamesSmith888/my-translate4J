@@ -17,11 +17,11 @@ public class OpusMtTranslate implements Translate {
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Resource
-    private Translator translator;
+    private OpusService opusService;
 
     @Override
     public String translate(String content) {
-        return translator.translate(content);
+        return opusService.translate(content);
     }
 
     @Override

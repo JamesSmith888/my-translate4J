@@ -4,7 +4,7 @@ import org.jim.mytranslate4j.config.Config;
 import org.jim.mytranslate4j.enums.TranslateType;
 import org.jim.mytranslate4j.event.UpdateTextAreaEvent;
 import org.jim.mytranslate4j.translate.Translate;
-import org.jim.mytranslate4j.translate.opus.Translator;
+import org.jim.mytranslate4j.translate.opus.OpusService;
 import com.plexpt.chatgpt.ChatGPT;
 import com.plexpt.chatgpt.entity.chat.ChatCompletion;
 import com.plexpt.chatgpt.entity.chat.ChatCompletionResponse;
@@ -27,7 +27,7 @@ public class ChatGptTranslate implements Translate {
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Resource
-    private Translator translator;
+    private OpusService opusService;
 
     @Resource
     private Config config;

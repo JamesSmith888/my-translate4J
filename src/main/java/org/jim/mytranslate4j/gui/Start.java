@@ -7,6 +7,8 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,22 +19,31 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.commons.lang3.StringUtils;
+import org.jim.mytranslate4j.ai.imagecaptioning.ImageCaptioningService;
 import org.jim.mytranslate4j.config.Config;
+import org.jim.mytranslate4j.event.ShowOverlayEvent;
 import org.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
 import org.jim.mytranslate4j.gui.pane.TranslatePane;
 import org.jim.mytranslate4j.gui.pane.TranslatePaneService;
 import org.jim.mytranslate4j.plugin.PluginService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,6 +69,9 @@ public class Start {
     @Resource
     private TranslatePaneService translatePaneService;
 
+    @Resource
+    private ImageCaptioningService imageCaptioningService;
+
     private Timeline translationTimeline;
 
     private TextArea textArea;
@@ -67,6 +81,9 @@ public class Start {
 
     @Resource
     private PluginService pluginService;
+
+    @Resource
+    private ApplicationEventPublisher applicationEventPublisher;
 
 
     public void start() {
@@ -109,6 +126,16 @@ public class Start {
 
             if (translationTimeline != null) {
                 translationTimeline.stop();
+            }
+
+            // 判断是否有\n，如果有，立即翻译
+            if (newValue.contains("\n")) {
+                // 插件翻译并且对应的翻译面板显示翻译结果
+                untranslatedTextAreaEvent.translated(newValue);
+
+                // 插件翻译并且对应的翻译面板显示翻译结果
+                pluginService.translateAndShow(newValue);
+                return;
             }
 
             translationTimeline = new Timeline(new KeyFrame(Duration.millis(1000), event -> {
@@ -177,18 +204,174 @@ public class Start {
 
         // 创建设置菜单项
         MenuItem settingsMenuItem = new MenuItem("设置");
-        settingsMenuItem.setOnAction(event -> {
-            // 显示设置面板
-            showSettingsPanel();
-        });
-
+        settingsMenuItem.setOnAction(event -> showSettingsPanel());
         // 添加设置菜单项到菜单栏
         Menu settingsMenu = new Menu("设置");
         settingsMenu.getItems().add(settingsMenuItem);
-        menuBar.getMenus().add(settingsMenu);
+
+        // 试验性功能
+        MenuItem experimentalMenuItem = new MenuItem("图片描述翻译（Image Captioning）");
+        experimentalMenuItem.setOnAction(event -> showExperimentalPanel());
+        // 添加 图片描述翻译（Image Captioning） 菜单项到菜单栏
+        Menu imageCaptioningMenu = new Menu("试验性功能");
+        imageCaptioningMenu.getItems().add(experimentalMenuItem);
+
+
+        menuBar.getMenus().addAll(settingsMenu, imageCaptioningMenu);
 
         // 添加菜单栏到布局
         vBox.getChildren().add(menuBar);
+    }
+
+    private void showExperimentalPanel() {
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("Image Processing");
+
+        BorderPane root = new BorderPane();
+
+        // Top bar with buttons
+        HBox topBar = new HBox();
+        topBar.setSpacing(10);
+        topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setPadding(new Insets(15, 15, 15, 15));
+
+        Button screenshotButton = new Button("截屏");
+        topBar.getChildren().addAll(screenshotButton);
+        root.setTop(topBar);
+
+        Label serverStatusLabel = new Label("服务启动中...");
+
+        // 设置Label外观和位置
+        serverStatusLabel.setStyle("-fx-text-fill: blue; -fx-underline: true;");
+        serverStatusLabel.setCursor(Cursor.HAND);
+
+        // 单击刷新服务器状态
+        serverStatusLabel.setOnMouseClicked(event -> serverStatus(serverStatusLabel));
+
+        // 将Label放置到BorderPane底部
+        HBox serverStatusBox = new HBox();
+        serverStatusBox.setAlignment(Pos.CENTER_LEFT);
+        serverStatusBox.setPadding(new Insets(0, 0, 10, 10));
+        serverStatusBox.getChildren().add(serverStatusLabel);
+        root.setBottom(serverStatusBox);
+
+        // Image view for the original image
+        ImageView originalImageView = new ImageView();
+
+        // Set a fixed size for the image view and preserve the aspect ratio
+        originalImageView.setPreserveRatio(true);
+        originalImageView.setFitHeight(400);
+        originalImageView.setFitWidth(300);
+
+        Label label = new Label("点击上传图片");
+        // 设置文本样式
+        label.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        // 创建一个StackPane将ImageView、Label和边框组合在一起
+        StackPane stackPane = new StackPane();
+        stackPane.setAlignment(Pos.CENTER);
+        stackPane.getChildren().addAll(originalImageView, label);
+
+        // 设置StackPane的边框和鼠标样式
+        stackPane.setStyle("-fx-border-color: gray; -fx-border-width: 1; -fx-border-style: dashed;");
+        stackPane.setCursor(Cursor.HAND);
+
+        // Center content with image view and label
+        VBox centerContent = new VBox();
+        centerContent.setSpacing(10);
+        centerContent.setAlignment(Pos.CENTER);
+        centerContent.setPadding(new Insets(20, 20, 20, 20));
+
+        HBox imageHBox = new HBox();
+        imageHBox.setSpacing(20);
+        imageHBox.setAlignment(Pos.CENTER);
+
+        VBox originalImageBox = new VBox();
+        originalImageBox.setSpacing(5);
+        originalImageBox.setAlignment(Pos.CENTER);
+
+        originalImageBox.getChildren().add(stackPane);
+
+        imageHBox.getChildren().addAll(originalImageBox);
+        centerContent.getChildren().add(imageHBox);
+
+        // Input text field for user prompt and submit button
+        TextArea promptInput = new TextArea();
+        promptInput.setPromptText("（非必填）图片提示词，用于补充模型忽略的描述。例如：一只狗在草地上。");
+
+        // 设置TextArea宽度和高度
+        promptInput.setPrefWidth(200);
+        promptInput.setPrefHeight(60);
+
+        // 执行按钮
+        Button submitButton = new Button("运行");
+
+        // 将TextArea和Button放在同一行
+        HBox inputAndSubmit = new HBox();
+        inputAndSubmit.setSpacing(10);
+        inputAndSubmit.setAlignment(Pos.CENTER);
+        inputAndSubmit.getChildren().addAll(promptInput, submitButton);
+
+        centerContent.getChildren().add(inputAndSubmit);
+
+
+        // Label for displaying the image description
+        Label imageDescriptionLabel = new Label();
+        centerContent.getChildren().add(imageDescriptionLabel);
+
+        // File chooser for image upload
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Image File");
+
+        // Check server status on startup
+        serverStatus(serverStatusLabel);
+
+        // Event handlers
+        stackPane.setOnMouseClicked(e -> {
+            File file = fileChooser.showOpenDialog(primaryStage);
+            if (file != null) {
+                Image image = new Image(file.toURI().toString());
+                originalImageView.setImage(image);
+            }
+        });
+
+        submitButton.setOnAction(event -> {
+            submitButton.setText("运行中...");
+
+            Image image = originalImageView.getImage();
+            String prompt = promptInput.getText();
+            String imageDescription = imageCaptioningService.getImageDescription(image, prompt);
+            imageDescriptionLabel.setText(imageDescription);
+
+            // 将图片描述填充到文本框进行翻译
+            updateTextAreaAndTranslate(imageDescription);
+            // 翻译窗口置顶
+            primaryStage.toFront();
+
+            submitButton.setText("运行");
+        });
+
+        screenshotButton.setOnAction(e -> {
+            // 发布显示遮罩层的事件
+            applicationEventPublisher.publishEvent(new ShowOverlayEvent(this, org.jim.mytranslate4j.common.ScreenCapture.IMAGE_CAPTIONING));
+        });
+
+        root.setTop(topBar);
+        root.setCenter(centerContent);
+
+        Scene scene = new Scene(root, 500, 600);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+
+    private void serverStatus(Label serverStatusLabel) {
+        serverStatusLabel.setText("检查中...");
+
+        boolean b = imageCaptioningService.serverStatus();
+
+        serverStatusLabel.setText(b ? "已连接" : "服务启动失败");
     }
 
 
@@ -239,8 +422,8 @@ public class Start {
         Label modelLabel = new Label("模型:");
         ChoiceBox<String> modelChoiceBox = new ChoiceBox<>();
 
-        modelChoiceBox.getItems().addAll(Arrays.stream(ChatCompletion.Model.values()).map(Enum::name).toList());
-        modelChoiceBox.setValue(ChatCompletion.Model.GPT_3_5_TURBO.name());
+        modelChoiceBox.getItems().addAll(Arrays.stream(ChatCompletion.Model.values()).map(ChatCompletion.Model::getName).toList());
+        modelChoiceBox.setValue(ChatCompletion.Model.GPT_3_5_TURBO.getName());
 
         // 保存按钮
         Button submitButton = new Button("保存");
@@ -319,6 +502,13 @@ public class Start {
      */
     public void updateTextArea(String text) {
         Platform.runLater(() -> textArea.setText(text));
+    }
+
+    /**
+     * 更新需要翻译的textArea的内容，并且设置标志位，从而立即翻译
+     */
+    public void updateTextAreaAndTranslate(String text) {
+        Platform.runLater(() -> textArea.setText(text + "\n"));
     }
 
     /**

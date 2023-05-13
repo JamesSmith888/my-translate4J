@@ -1,6 +1,5 @@
 package org.jim.mytranslate4j.gui;
 
-import org.jim.mytranslate4j.event.ScreenCaptureEvent;
 import jakarta.annotation.Resource;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
@@ -21,6 +20,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.jim.mytranslate4j.event.ScreenCaptureEvent;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,7 +53,7 @@ public class ScreenCapture {
     /**
      * 弹出截屏界面
      */
-    public void showOverlay() {
+    public void showOverlay(org.jim.mytranslate4j.common.ScreenCapture screenCapture) {
         List<Screen> screens = Screen.getScreens();
         for (Screen screen : screens) {
             Stage stage = new Stage();
@@ -80,7 +80,7 @@ public class ScreenCapture {
 
             scene.setOnMousePressed(event -> onMousePressed(event, pane));
             scene.setOnMouseDragged(this::onMouseDragged);
-            scene.setOnMouseReleased(event -> onMouseReleased(event, stage));
+            scene.setOnMouseReleased(event -> onMouseReleased(event, stage, screenCapture));
 
             scene.setOnKeyPressed(event -> {
                 if (event.getCode() == KeyCode.ESCAPE) {
@@ -119,7 +119,7 @@ public class ScreenCapture {
         }
     }
 
-    private void onMouseReleased(MouseEvent event, Stage stage) {
+    private void onMouseReleased(MouseEvent event, Stage stage, org.jim.mytranslate4j.common.ScreenCapture screenCapture) {
         if (event.getButton() == MouseButton.PRIMARY) {
             double width = selectionRectangle.getWidth();
             double height = selectionRectangle.getHeight();
@@ -128,18 +128,16 @@ public class ScreenCapture {
                 for (Stage s : stages) {
                     s.hide();
                 }
-                captureAndSaveScreenshot(stage);
+                captureAndSaveScreenshot(stage, screenCapture);
             }
         }
     }
 
+
     /**
      * 截取用户选择的区域并保存到文件
      */
-    /**
-     * 截取用户选择的区域并保存到文件
-     */
-    private void captureAndSaveScreenshot(Stage primaryStage) {
+    private void captureAndSaveScreenshot(Stage primaryStage, org.jim.mytranslate4j.common.ScreenCapture screenCapture) {
         // Hide the primaryStage before capturing
         primaryStage.hide();
 
@@ -179,7 +177,7 @@ public class ScreenCapture {
         primaryStage.close();
 
         // 发起已经截图的事件
-        applicationEventPublisher.publishEvent(new ScreenCaptureEvent(this));
+        applicationEventPublisher.publishEvent(new ScreenCaptureEvent(this, screenCapture));
     }
 
 
@@ -203,5 +201,8 @@ public class ScreenCapture {
     }
 
 
+    public void showOverlay() {
+        showOverlay(null);
+    }
 }
 

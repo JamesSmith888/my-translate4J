@@ -54,17 +54,21 @@ public class AppConfig {
             }
         };
 
+        // 设置超时时间
+        //requestFactory.setConnectTimeout(10000);
+        //requestFactory.setReadTimeout(10000);
+
         RestTemplate restTemplate = new RestTemplate(requestFactory);
 
 
         // 预热 RestTemplate
-        //warmUpRestTemplate(restTemplate);
+        warmUpRestTemplate(restTemplate);
 
         return restTemplate;
     }
 
     private void warmUpRestTemplate(RestTemplate restTemplate) {
-        String warmUpUrl = "https://httpbin.org/get";
+        String warmUpUrl = "https://www.baidu.com";
 
         // 发送预热请求
         try {

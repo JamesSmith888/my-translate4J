@@ -38,3 +38,4 @@ build/
 .vscode/
 /trans-opus-mt-en-zh/
 /opus-mt-en-zh-local/
+/blip-image-captioning-base/
