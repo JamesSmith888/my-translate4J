@@ -22,7 +22,7 @@
             <artifactId>my-translate4J-plugin-api</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:\maven\repository\org\jim\my-translate4J-plugin-api\1.0-SNAPSHOT\my-translate4J-plugin-api-1.0-SNAPSHOT.jar</systemPath>
+            <systemPath>C:\Users\A\.m2\repository\org\jim\my-translate4J-plugin-api\1.0-SNAPSHOT\my-translate4J-plugin-api-1.0-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.openpnp/opencv -->
@@ -93,7 +93,7 @@
             <version>11.6.16</version>
         </dependency>
 
-        <dependency>
+<!--        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>17.0.2</version>
@@ -102,7 +102,7 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>17.0.2</version>
-        </dependency>
+        </dependency>-->
 
 
         <!-- For reactive support -->

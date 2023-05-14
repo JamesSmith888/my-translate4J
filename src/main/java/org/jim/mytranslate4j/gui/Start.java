@@ -78,6 +78,10 @@ public class Start {
 
     private Stage stage;
 
+    private ImageView originalImageView;
+
+    private Stage imgStage;
+
 
     @Resource
     private PluginService pluginService;
@@ -178,7 +182,12 @@ public class Start {
         });
 
         // 窗口隐藏时，清空文本框内容
-        stage.setOnHidden(event -> translatePaneService.clear());
+        stage.setOnHidden(event -> {
+            // 清空原文本
+            textArea.clear();
+
+            translatePaneService.clear();
+        });
 
         // esc键隐藏窗口
         stage.addEventHandler(javafx.scene.input.KeyEvent.KEY_RELEASED, event -> {
@@ -210,7 +219,7 @@ public class Start {
         settingsMenu.getItems().add(settingsMenuItem);
 
         // 试验性功能
-        MenuItem experimentalMenuItem = new MenuItem("图片描述翻译（Image Captioning）");
+        MenuItem experimentalMenuItem = new MenuItem("图片字幕翻译（Image Captioning）");
         experimentalMenuItem.setOnAction(event -> showExperimentalPanel());
         // 添加 图片描述翻译（Image Captioning） 菜单项到菜单栏
         Menu imageCaptioningMenu = new Menu("试验性功能");
@@ -224,8 +233,8 @@ public class Start {
     }
 
     private void showExperimentalPanel() {
-        Stage primaryStage = new Stage();
-        primaryStage.setTitle("Image Processing");
+        imgStage = new Stage();
+        imgStage.setTitle("Image Processing");
 
         BorderPane root = new BorderPane();
 
@@ -256,12 +265,12 @@ public class Start {
         root.setBottom(serverStatusBox);
 
         // Image view for the original image
-        ImageView originalImageView = new ImageView();
+        originalImageView = new ImageView();
 
         // Set a fixed size for the image view and preserve the aspect ratio
         originalImageView.setPreserveRatio(true);
-        originalImageView.setFitHeight(400);
-        originalImageView.setFitWidth(300);
+        originalImageView.setFitHeight(600);
+        originalImageView.setFitWidth(600);
 
         Label label = new Label("点击上传图片");
         // 设置文本样式
@@ -300,8 +309,8 @@ public class Start {
         promptInput.setPromptText("（非必填）图片提示词，用于补充模型忽略的描述。例如：一只狗在草地上。");
 
         // 设置TextArea宽度和高度
-        promptInput.setPrefWidth(200);
-        promptInput.setPrefHeight(60);
+        promptInput.setPrefWidth(550);
+        promptInput.setPrefHeight(70);
 
         // 执行按钮
         Button submitButton = new Button("运行");
@@ -328,7 +337,7 @@ public class Start {
 
         // Event handlers
         stackPane.setOnMouseClicked(e -> {
-            File file = fileChooser.showOpenDialog(primaryStage);
+            File file = fileChooser.showOpenDialog(imgStage);
             if (file != null) {
                 Image image = new Image(file.toURI().toString());
                 originalImageView.setImage(image);
@@ -338,20 +347,33 @@ public class Start {
         submitButton.setOnAction(event -> {
             submitButton.setText("运行中...");
 
-            Image image = originalImageView.getImage();
-            String prompt = promptInput.getText();
-            String imageDescription = imageCaptioningService.getImageDescription(image, prompt);
-            imageDescriptionLabel.setText(imageDescription);
+            // 异步执行，防止界面卡死
+            Thread thread = new Thread(() -> {
+                Image image = originalImageView.getImage();
+                String prompt = promptInput.getText();
+                String imageDescription = imageCaptioningService.getImageDescription(image, prompt);
 
-            // 将图片描述填充到文本框进行翻译
-            updateTextAreaAndTranslate(imageDescription);
-            // 翻译窗口置顶
-            primaryStage.toFront();
+                Platform.runLater(() -> {
+                    imageDescriptionLabel.setText(imageDescription);
+                    submitButton.setText("运行");
+                    // 翻译窗口置顶
+                    stage.toFront();
+                });
 
-            submitButton.setText("运行");
+                // 将图片描述填充到文本框进行翻译
+                updateTextAreaAndTranslate(imageDescription);
+
+            });
+
+            thread.start();
         });
 
         screenshotButton.setOnAction(e -> {
+            // 隐藏当前窗口
+            imgStage.hide();
+            // 隐藏翻译窗口
+            stage.hide();
+
             // 发布显示遮罩层的事件
             applicationEventPublisher.publishEvent(new ShowOverlayEvent(this, org.jim.mytranslate4j.common.ScreenCapture.IMAGE_CAPTIONING));
         });
@@ -359,19 +381,36 @@ public class Start {
         root.setTop(topBar);
         root.setCenter(centerContent);
 
-        Scene scene = new Scene(root, 500, 600);
+        Scene scene = new Scene(root, 650, 800);
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        imgStage.setScene(scene);
+        imgStage.show();
+    }
+
+    public void setOriginalImageView() {
+        Platform.runLater(() -> {
+            // 显示图片处理窗口
+            imgStage.show();
+            // 显示翻译窗口
+            stage.show();
+
+            File file = new File("temp/screenshot.png");
+            Image image = new Image(file.toURI().toString());
+            originalImageView.setImage(image);
+        });
     }
 
 
     private void serverStatus(Label serverStatusLabel) {
         serverStatusLabel.setText("检查中...");
 
-        boolean b = imageCaptioningService.serverStatus();
+        Thread thread = new Thread(() -> {
+            boolean b = imageCaptioningService.serverStatus();
 
-        serverStatusLabel.setText(b ? "已连接" : "服务启动失败");
+            Platform.runLater(() -> serverStatusLabel.setText(b ? "已连接模型服务" : "服务启动失败"));
+        });
+
+        thread.start();
     }
 
 

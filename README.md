@@ -1,9 +1,8 @@
 My-Translate4J
 ==============
 
-My-Translate4J 是一个基于Jdk17、Spring Boot 3.0.6、Python 3.10、PowerShell 和 JavaFX 的 Windows 桌面客户端翻译软件，但目前还处于开发优化阶段，适合有相关知识的开发者。它支持多种翻译来源，如百度翻译（需要申请 API）、ChatGPT（需要申请 token 和本地代理）、MyMemory 和 Opus\_mt\_en\_zh（需要下载翻译模型）。
+My-Translate4J 是一个基于Jdk17、Spring Boot 3.0.6、Python 3.10、PowerShell 和 JavaFX 的 Windows 桌面客户端翻译软件，但目前还处于开发优化阶段，适合有相关知识的开发者。默认已集成baidu翻译、ChatGPT、MyMemory、blip-image-captioning-base 和 opus-mt-en-zh。
 
-![My-Translate4J GUI](src/main/resources/img/gui.png)
 
 该软件还支持插件/扩展功能，基于 SPI 实现。插件 SDK 和插件 demo 可在以下链接中找到：
 
@@ -13,6 +12,13 @@ My-Translate4J 是一个基于Jdk17、Spring Boot 3.0.6、Python 3.10、PowerShe
 OCR 识图功能基于 Tess4J 项目，目前英文识别效果较好，但中文识别率不太高。需要下载相关模型后放入 tessdata 文件夹中。
 
 使用快捷键 Alt+S 进行截图翻译，Alt+Z 对选中的文本进行翻译。请注意检查是否有快捷键冲突。
+
+试验性功能
+-----
+
+### 图片字幕翻译/Image Captioning
+![My-Translate4J GUI](src/main/resources/img/image_captioning.png)
+![My-Translate4J GUI](src/main/resources/img/gui.png)
 
 如何开始
 ----
@@ -26,11 +32,29 @@ OCR 识图功能基于 Tess4J 项目，目前英文识别效果较好，但中�
 --module-path javafx_path/lib --add-modules javafx.controls,javafx.fxml
 ```
 
-### Opus\_mt\_en\_zh 翻译模型
+### Helsinki-NLP/opus-mt-en-zh 模型
 
 从以下链接下载所有文件并放入项目根目录下的 `opus-mt-en-zh-local` 文件夹中：
 
 [https://huggingface.co/Helsinki-NLP/opus-mt-en-zh/tree/main](https://huggingface.co/Helsinki-NLP/opus-mt-en-zh/tree/main)
+
+### Salesforce/blip-image-captioning-base 模型
+
+从以下链接下载所有文件并放入项目根目录下的 `blip-image-captioning-base` 文件夹中：
+
+[https://huggingface.co/Salesforce/blip-image-captioning-base/tree/main](https://huggingface.co/Salesforce/blip-image-captioning-base/tree/main)
+
+### baidu 翻译 API
+
+在系统设置中填写已申请的 API Key 和 Secret Key：
+
+[https://api.fanyi.baidu.com/doc/12](https://api.fanyi.baidu.com/doc/12)
+
+### ChatGPT API
+
+在系统设置中填写已申请的 token：
+
+[https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
 
 ### OCR 识图模型
 
@@ -51,42 +75,64 @@ OCR 识图功能基于 Tess4J 项目，目前英文识别效果较好，但中�
 My-Translate4J
 ==============
 
-My-Translate4J is a desktop translation software for Windows, built with Jdk17、Spring Boot 3.0.6, Python 3.10, PowerShell, and JavaFX,but currently, it is still in the development and optimization stage, suitable for developers with relevant knowledge. It supports various translation sources, such as Baidu Translate (requires API application), ChatGPT (requires token and local proxy application), MyMemory, and Opus\_mt\_en\_zh (requires translation model download).
+My-Translate4J is a Windows desktop client translation software based on JDK17, Spring Boot 3.0.6, Python 3.10, PowerShell, and JavaFX. It is currently in the development and optimization phase and is suitable for developers with relevant knowledge. By default, it integrates Baidu translation, ChatGPT, MyMemory, blip-image-captioning-base, and opus-mt-en-zh.
 
-The software also supports plugin/extension features, implemented based on SPI. The plugin SDK and plugin demo can be found in the following links:
+The software also supports plugin/extension functionality based on SPI implementation. The plugin SDK and plugin demo can be found at the following links:
 
 *   Plugin SDK: [https://github.com/youdontknow-hash/my-translate4J-plugin-api](https://github.com/youdontknow-hash/my-translate4J-plugin-api)
 *   Plugin demo: [https://github.com/youdontknow-hash/my-translate4J-plugin-api-demo](https://github.com/youdontknow-hash/my-translate4J-plugin-api-demo)
 
-The OCR image recognition feature is based on the Tess4J project. Currently, English recognition is good, but Chinese recognition is not very high. You need
+The OCR image recognition function is based on the Tess4J project. The recognition of English is quite good, but the recognition rate for Chinese is not high. The relevant models need to be downloaded and placed in the tessdata folder.
 
-to download the relevant models and place them in the `tessdata` folder.
+Use the shortcut Alt+S for screenshot translation and Alt+Z for translating selected text. Please check for possible shortcut conflicts.
 
-Use the shortcut Alt+S for screenshot translation and Alt+Z for translating selected text. Please check for shortcut key conflicts.
+Experimental Features
+---------------------
 
-Click the top left corner to switch between Chinese/English documentation.
+### Image Captioning Translation
+
+![My-Translate4J GUI](src/main/resources/img/image_captioning.png)
+![My-Translate4J GUI](src/main/resources/img/gui.png)
 
 Getting Started
 ---------------
 
 ### Install JavaFX
 
-Since the new version of JDK has stripped the JavaFX-related libraries, you need to manually download and import them into the project. When running, add the following VM options:
+As the new versions of JDK have separated JavaFX related libraries, you need to manually download and import them into the project. Add the following VM options at runtime:
 
 
 ```css
 --module-path javafx_path/lib --add-modules javafx.controls,javafx.fxml
 ```
 
-### Opus\_mt\_en\_zh Translation Model
+### Helsinki-NLP/opus-mt-en-zh Model
 
-Download all files from the link below and place them in the `opus-mt-en-zh-local` folder under the project root directory:
+Download all files from the following link and place them in the `opus-mt-en-zh-local` folder in the project root directory:
 
 [https://huggingface.co/Helsinki-NLP/opus-mt-en-zh/tree/main](https://huggingface.co/Helsinki-NLP/opus-mt-en-zh/tree/main)
 
+### Salesforce/blip-image-captioning-base Model
+
+Download all files from the following link and place them in the `blip-image-captioning-base` folder in the project root directory:
+
+[https://huggingface.co/Salesforce/blip-image-captioning-base/tree/main](https://huggingface.co/Salesforce/blip-image-captioning-base/tree/main)
+
+### Baidu Translation API
+
+Enter the applied API Key and Secret Key in the system settings:
+
+[https://api.fanyi.baidu.com/doc/12](https://api.fanyi.baidu.com/doc/12)
+
+### ChatGPT API
+
+Enter the applied token in the system settings:
+
+[https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys)
+
 ### OCR Image Recognition Model
 
-Download the relevant models from the Tesseract official website and place them in the `tessdata` folder of the project.
+Download the relevant models from the Tesseract official website and place them in the project's `tessdata` folder.
 
 Contributing
 ------------

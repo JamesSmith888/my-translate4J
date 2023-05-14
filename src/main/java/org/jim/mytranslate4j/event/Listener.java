@@ -46,14 +46,8 @@ public class Listener {
         }
 
 
-        // TODO 获取图片提示词
-
-
-
-        // image-captioning 识别图片
-        String processor = imageCaptioningService.processor("");
-        // 将处理后的字幕显示到UI
-        start.updateTextAreaAndTranslate(processor);
+        // 图片回显到面板
+        start.setOriginalImageView();
 
     }
 
