@@ -29,13 +29,13 @@ public class Init implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 启动ImageCaptioningService
-        imageCaptioningService.init();
+        //imageCaptioningService.init();
 
         // 加载插件/扩展
         pluginLoader.loaderPlugin();
 
         // 启动OpusMtEnZhTranslateService
-        opusService.init();
+        //opusService.init();
 
     }
 }

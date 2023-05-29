@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 @Component
 public class Listener {
 
-    @Resource
+    @Resource(name = "paddleocrService")
     private OcrService ocrService;
 
     @Resource
