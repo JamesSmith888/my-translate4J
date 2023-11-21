@@ -1,9 +1,10 @@
-package org.jim.mytranslate4j.plugin;
+package org.jim.mytranslate4j.extension;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jim.TranslatePlugin;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ServiceLoader;
 
 /**
@@ -12,15 +13,24 @@ import java.util.ServiceLoader;
  */
 @Component
 @Slf4j
-public class PluginLoader {
+public class ExtensionLoader {
 
     private ServiceLoader<TranslatePlugin> loader;
 
-    public void loaderPlugin() {
+    public void loaderPlugin() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         // 判断是否已经加载过
         if (loader != null) {
             return;
         }
+
+        ExtensionClassLoader extensionClassLoader = new ExtensionClassLoader();
+
+
+        Class<?> pluginClass = extensionClassLoader.loadClass("org.jim.TestTranslatePlugin");
+        TranslatePlugin plugin = (TranslatePlugin)pluginClass.getDeclaredConstructor().newInstance();
+        String test = plugin.translate("test");
+        System.out.println(test);
+
 
         loader = ServiceLoader.load(TranslatePlugin.class);
 

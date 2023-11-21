@@ -1,4 +1,4 @@
-package org.jim.mytranslate4j.plugin;
+package org.jim.mytranslate4j.extension;
 
 import jakarta.annotation.Resource;
 import javafx.scene.control.TitledPane;
@@ -15,14 +15,14 @@ import java.util.concurrent.Executors;
  * @author jim
  */
 @Component
-public class PluginService {
+public class ExtensionService {
 
     @Resource
-    private PluginLoader pluginLoader;
+    private ExtensionLoader extensionLoader;
 
 
     private ServiceLoader<TranslatePlugin> getPlugin() {
-        return pluginLoader.plugins();
+        return extensionLoader.plugins();
     }
 
     /**
@@ -37,15 +37,15 @@ public class PluginService {
         return plugins.stream()
                 .map(ServiceLoader.Provider::get)
                 .map(plugin -> {
-                    TranslatePluginAdapter translatePluginAdapter = new TranslatePluginAdapter(plugin);
+                    TranslateExtensionAdapter translateExtensionAdapter = new TranslateExtensionAdapter(plugin);
                     // 初始化插件面板对象
-                    translatePluginAdapter.setPluginGui(new PluginGui());
+                    translateExtensionAdapter.setExtensionGui(new ExtensionGui());
 
                     // 插件适配器对象缓存起来，方便后面使用
-                    TranslatePluginAdapter.TRANSLATE_PLUGINS.put(plugin, translatePluginAdapter);
+                    TranslateExtensionAdapter.TRANSLATE_PLUGINS.put(plugin, translateExtensionAdapter);
 
                     // 初始化并返回插件面板
-                    return translatePluginAdapter.initPluginPane();
+                    return translateExtensionAdapter.initPluginPane();
                 }).toList();
     }
 
@@ -54,7 +54,7 @@ public class PluginService {
      * 翻译并且显示
      */
     public void translateAndShow(String newValue) {
-        List<TranslatePluginAdapter> pluginAdapters = getPluginAdapters();
+        List<TranslateExtensionAdapter> pluginAdapters = getPluginAdapters();
         if (CollectionUtils.isEmpty(pluginAdapters)) {
             return;
         }
@@ -63,10 +63,10 @@ public class PluginService {
 
         pluginAdapters.forEach(pluginAdapter -> {
             executorService.submit(() -> {
-                PluginGui pluginGui = pluginAdapter.getPluginGui();
+                ExtensionGui extensionGui = pluginAdapter.getExtensionGui();
 
-                pluginGui.updateTextArea("翻译中...");
-                pluginGui.updateTextArea(pluginAdapter.translate(newValue));
+                extensionGui.updateTextArea("翻译中...");
+                extensionGui.updateTextArea(pluginAdapter.translate(newValue));
             });
 
         });
@@ -76,15 +76,15 @@ public class PluginService {
     /**
      * 获取插件adapter
      */
-    public TranslatePluginAdapter getPluginAdapter(TranslatePlugin plugin) {
-        return TranslatePluginAdapter.TRANSLATE_PLUGINS.get(plugin);
+    public TranslateExtensionAdapter getPluginAdapter(TranslatePlugin plugin) {
+        return TranslateExtensionAdapter.TRANSLATE_PLUGINS.get(plugin);
     }
 
     /**
      * 获取插件adapters
      */
-    public List<TranslatePluginAdapter> getPluginAdapters() {
-        return List.copyOf(TranslatePluginAdapter.TRANSLATE_PLUGINS.values());
+    public List<TranslateExtensionAdapter> getPluginAdapters() {
+        return List.copyOf(TranslateExtensionAdapter.TRANSLATE_PLUGINS.values());
     }
 
     /**

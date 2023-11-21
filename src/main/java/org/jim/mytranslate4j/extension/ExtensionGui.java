@@ -1,4 +1,4 @@
-package org.jim.mytranslate4j.plugin;
+package org.jim.mytranslate4j.extension;
 
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;
@@ -11,7 +11,7 @@ import org.jim.mytranslate4j.gui.pane.TranslatePane;
  * @author jim
  */
 @Data
-public class PluginGui {
+public class ExtensionGui {
 
 
     /**

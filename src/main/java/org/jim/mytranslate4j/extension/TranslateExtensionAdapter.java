@@ -1,4 +1,4 @@
-package org.jim.mytranslate4j.plugin;
+package org.jim.mytranslate4j.extension;
 
 import javafx.scene.control.TitledPane;
 import lombok.Data;
@@ -10,12 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jim
  */
 @Data
-public class TranslatePluginAdapter {
+public class TranslateExtensionAdapter {
 
     /**
      * 缓存插件适配器对象
      */
-    public static final ConcurrentHashMap<TranslatePlugin, TranslatePluginAdapter> TRANSLATE_PLUGINS = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<TranslatePlugin, TranslateExtensionAdapter> TRANSLATE_PLUGINS = new ConcurrentHashMap<>();
 
     /**
      * 当前插件
@@ -25,25 +25,25 @@ public class TranslatePluginAdapter {
     /**
      * PluginGui
      */
-    private PluginGui pluginGui;
+    private ExtensionGui extensionGui;
 
 
     public String translate(String text) {
         return plugin.translate(text);
     }
 
-    public TranslatePluginAdapter(TranslatePlugin plugin, PluginGui pluginGui) {
+    public TranslateExtensionAdapter(TranslatePlugin plugin, ExtensionGui extensionGui) {
         this.plugin = plugin;
-        this.pluginGui = pluginGui;
+        this.extensionGui = extensionGui;
     }
 
-    public TranslatePluginAdapter(TranslatePlugin plugin) {
+    public TranslateExtensionAdapter(TranslatePlugin plugin) {
         this.plugin = plugin;
     }
 
     public TitledPane initPluginPane() {
 
-        return pluginGui.initPluginPane(getPlugin());
+        return extensionGui.initPluginPane(getPlugin());
     }
 
 
