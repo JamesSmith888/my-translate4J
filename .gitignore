@@ -8,6 +8,7 @@ javafx-sdk-17.0.7/
 temp/
 src/main/resources/config.yml
 /extensions/*
+/startLog/*
 
 ### STS ###
 .apt_generated

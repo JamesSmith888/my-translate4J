@@ -26,6 +26,7 @@ public class ExtensionClassLoader extends URLClassLoader {
             log.error("extensions folder not exists");
             return;
         }
+        log.info("pluginFolder path: {}", pluginFolder.getAbsolutePath());
 
         // get all jar files in the extension subfolder
         File[] files = Arrays.stream(pluginFolder.listFiles((dir, name) -> !name.endsWith(".zip")))
@@ -44,7 +45,11 @@ public class ExtensionClassLoader extends URLClassLoader {
 
         for (File file : files) {
             try {
-                addURL(file.toURI().toURL());
+                log.info("load jar file: {}", file.getAbsolutePath());
+
+                URL urls = new URL("jar:" + file.toURI().toURL() + "!/");
+
+                addURL(urls);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -92,5 +97,10 @@ public class ExtensionClassLoader extends URLClassLoader {
 
     }
 
-
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        String path = name.replace('.', '/').concat(".class");
+        log.info("path: {}", path);
+        return super.findClass(name);
+    }
 }

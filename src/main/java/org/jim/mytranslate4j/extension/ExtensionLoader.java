@@ -23,13 +23,18 @@ public class ExtensionLoader {
             return;
         }
 
+/*        log.info("PluginLoader load plugin");
         ExtensionClassLoader extensionClassLoader = new ExtensionClassLoader();
+        log.info("extensionClassLoader: {}", extensionClassLoader);
 
+        log.info("currentWorkingDirectory: {}", System.getProperty("user.dir"));
 
         Class<?> pluginClass = extensionClassLoader.loadClass("org.jim.TestTranslatePlugin");
+        log.info("pluginClass: {}", pluginClass);
+
         TranslatePlugin plugin = (TranslatePlugin)pluginClass.getDeclaredConstructor().newInstance();
         String test = plugin.translate("test");
-        System.out.println(test);
+        System.out.println(test);*/
 
 
         loader = ServiceLoader.load(TranslatePlugin.class);

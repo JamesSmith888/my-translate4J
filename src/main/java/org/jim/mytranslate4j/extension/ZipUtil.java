@@ -23,6 +23,8 @@ public class ZipUtil {
     }
 
     public static void unzip(String zipFile, String zipName, String targetDir) {
+        log.info("unzip zipFile: {}, zipName: {}, targetDir: {}", zipFile, zipName, targetDir);
+
         // 创建解压目标目录
         String dirName = targetDir + "/" + zipName;
         File file = new File(dirName);
@@ -37,6 +39,7 @@ public class ZipUtil {
             while ((entry = zipInputStream.getNextEntry()) != null) {
                 String entryName = entry.getName();
                 File entryFile = new File(dirName + "/" + entryName);
+                log.info("unzip entry: {}", entryFile);
 
                 if (!entry.isDirectory()) {
                     try (FileOutputStream fos = new FileOutputStream(entryFile)) {
