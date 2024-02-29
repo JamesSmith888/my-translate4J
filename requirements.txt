@@ -1,0 +1,4 @@
+Flask==3.0.2
+paddleocr==2.7.0.3
+Pillow==10.2.0
+transformers==4.38.1
