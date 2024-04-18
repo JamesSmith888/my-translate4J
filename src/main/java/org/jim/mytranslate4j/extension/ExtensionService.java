@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,7 +20,7 @@ public class ExtensionService {
     private ExtensionLoader extensionLoader;
 
 
-    private ServiceLoader<TranslatePlugin> getPlugin() {
+    private List<TranslatePlugin> getPlugin() {
         return extensionLoader.plugins();
     }
 
@@ -29,13 +28,12 @@ public class ExtensionService {
      * 初始化插件翻译面板，并且构造缓存插件适配器对象
      */
     public List<TitledPane> initPluginPane() {
-        ServiceLoader<TranslatePlugin> plugins = getPlugin();
-        if (plugins == null) {
+        List<TranslatePlugin> plugins = getPlugin();
+        if (CollectionUtils.isEmpty(plugins)) {
             return null;
         }
 
         return plugins.stream()
-                .map(ServiceLoader.Provider::get)
                 .map(plugin -> {
                     TranslateExtensionAdapter translateExtensionAdapter = new TranslateExtensionAdapter(plugin);
                     // 初始化插件面板对象

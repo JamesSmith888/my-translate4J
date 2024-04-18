@@ -1,5 +1,5 @@
 import cv2
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from paddleocr import PaddleOCR
 
 app = Flask(__name__)
@@ -22,6 +22,7 @@ def ocr_endpoint():
             extracted_text.append(word_info[1][0])
 
     return jsonify(extracted_text)
+
 
 # test the server is running
 @app.route('/')

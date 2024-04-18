@@ -1,11 +1,14 @@
 package org.jim.mytranslate4j.extension;
 
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.jim.TranslatePlugin;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ServiceLoader;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author jim
@@ -15,32 +18,33 @@ import java.util.ServiceLoader;
 @Slf4j
 public class ExtensionLoader {
 
-    private ServiceLoader<TranslatePlugin> loader;
 
-    public void loaderPlugin() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        // 判断是否已经加载过
-        if (loader != null) {
-            return;
-        }
+    private final List<TranslatePlugin> plugins = Lists.newArrayList();
 
-/*        log.info("PluginLoader load plugin");
+    public void loaderPlugin() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
+        // TODO 判断是否已经加载过
+
+
+        log.info("PluginLoader load plugin");
         ExtensionClassLoader extensionClassLoader = new ExtensionClassLoader();
         log.info("extensionClassLoader: {}", extensionClassLoader);
 
-        log.info("currentWorkingDirectory: {}", System.getProperty("user.dir"));
-
-        Class<?> pluginClass = extensionClassLoader.loadClass("org.jim.TestTranslatePlugin");
-        log.info("pluginClass: {}", pluginClass);
-
-        TranslatePlugin plugin = (TranslatePlugin)pluginClass.getDeclaredConstructor().newInstance();
-        String test = plugin.translate("test");
-        System.out.println(test);*/
 
 
-        loader = ServiceLoader.load(TranslatePlugin.class);
+        List<String> classNames = ExtensionClassLoader.classMap.values().stream().flatMap(Collection::stream).toList();
+
+        for (String className : classNames) {
+            Class<?> clazz = extensionClassLoader.loadClass(className);
+            if (!TranslatePlugin.class.isAssignableFrom(clazz)) {
+                continue;
+            }
+
+            TranslatePlugin plugin = (TranslatePlugin) clazz.getDeclaredConstructor().newInstance();
+            plugins.add(plugin);
+        }
+
 
         checkPlugin();
-
 
         log.info("PluginLoader load plugin success");
     }
@@ -52,8 +56,8 @@ public class ExtensionLoader {
         // TODO
     }
 
-    protected ServiceLoader<TranslatePlugin> plugins() {
-        return loader;
+    protected List<TranslatePlugin> plugins() {
+        return plugins;
     }
 
 }
