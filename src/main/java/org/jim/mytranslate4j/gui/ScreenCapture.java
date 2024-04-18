@@ -163,7 +163,9 @@ public class ScreenCapture {
         // Save the snapshot to the project root folder
         File outputDirectory = new File("temp");
         if (!outputDirectory.exists()) {
-            outputDirectory.mkdir();
+            if (!outputDirectory.mkdir()) {
+                System.out.println("Failed to create output directory.");
+            }
         }
 
         File outputFile = new File(outputDirectory, "screenshot.png");

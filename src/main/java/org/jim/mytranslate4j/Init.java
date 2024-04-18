@@ -3,7 +3,7 @@ package org.jim.mytranslate4j;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.jim.mytranslate4j.ai.imagecaptioning.ImageCaptioningService;
-import org.jim.mytranslate4j.plugin.PluginLoader;
+import org.jim.mytranslate4j.extension.ExtensionLoader;
 import org.jim.mytranslate4j.translate.opus.OpusService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class Init implements CommandLineRunner {
 
     @Resource
-    private PluginLoader pluginLoader;
+    private ExtensionLoader extensionLoader;
 
     @Resource
     private ImageCaptioningService imageCaptioningService;
@@ -29,13 +29,13 @@ public class Init implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 启动ImageCaptioningService
-        imageCaptioningService.init();
+        //imageCaptioningService.init();
 
         // 加载插件/扩展
-        pluginLoader.loaderPlugin();
+        extensionLoader.loaderPlugin();
 
         // 启动OpusMtEnZhTranslateService
-        opusService.init();
+        //opusService.init();
 
     }
 }

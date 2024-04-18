@@ -84,7 +84,9 @@ public class ImageCaptioningService {
 
         var request = new HttpEntity<>(requestBody, headers);
 
-        var response = restTemplate.postForEntity("http://localhost:5000/process_image", request, String.class);
+        String path = System.getProperty("user.dir") + "/temp/screenshot.png";
+
+        var response = restTemplate.postForEntity("http://localhost:5000/process_image/" + path, request, String.class);
         log.info("response: {}", response);
 
         if (response.getStatusCode().is2xxSuccessful()) {

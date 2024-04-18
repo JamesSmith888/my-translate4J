@@ -8,11 +8,16 @@ public interface OcrService {
     /**
      * 加载ocr模型，目前先写死。后续有思路再改
      */
-    void loadModel();
+    default void loadModel() {
+
+    }
 
     String doOcr(String imagePath);
 
     default String doOcr() {
-        return doOcr("temp/screenshot.png");
+        // 获取项目绝对路径
+        String path = System.getProperty("user.dir");
+
+        return doOcr(path + "/temp/screenshot.png");
     }
 }

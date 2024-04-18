@@ -35,7 +35,7 @@ import org.jim.mytranslate4j.event.ShowOverlayEvent;
 import org.jim.mytranslate4j.event.gui.UntranslatedTextAreaEvent;
 import org.jim.mytranslate4j.gui.pane.TranslatePane;
 import org.jim.mytranslate4j.gui.pane.TranslatePaneService;
-import org.jim.mytranslate4j.plugin.PluginService;
+import org.jim.mytranslate4j.extension.ExtensionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -84,7 +84,7 @@ public class Start {
 
 
     @Resource
-    private PluginService pluginService;
+    private ExtensionService extensionService;
 
     @Resource
     private ApplicationEventPublisher applicationEventPublisher;
@@ -138,7 +138,7 @@ public class Start {
                 untranslatedTextAreaEvent.translated(newValue);
 
                 // 插件翻译并且对应的翻译面板显示翻译结果
-                pluginService.translateAndShow(newValue);
+                extensionService.translateAndShow(newValue);
                 return;
             }
 
@@ -151,7 +151,7 @@ public class Start {
                 untranslatedTextAreaEvent.translated(newValue);
 
                 // 插件翻译并且对应的翻译面板显示翻译结果
-                pluginService.translateAndShow(newValue);
+                extensionService.translateAndShow(newValue);
 
             }));
             translationTimeline.play();
@@ -170,7 +170,7 @@ public class Start {
         translatePanes.forEach(f -> children.add(f.pane()));
 
         // 创建插件面板
-        children.addAll(pluginService.initPluginPane());
+        children.addAll(extensionService.initPluginPane());
 
 
         stage.setScene(new Scene(vBox, 400, 500));
